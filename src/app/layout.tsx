@@ -72,6 +72,18 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-ivory text-text antialiased">
         {/*
+          Keyboard users can jump straight past repeated navigation. The link is
+          visually hidden until focused, and every page shell exposes the matching
+          #main-content target added in Part 14.
+        */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-plum focus:px-5 focus:py-3 focus:text-sm focus:font-bold focus:text-white focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
+
+        {/*
           AuthProvider wraps the whole route tree so the navbar, page guards,
           dashboards and forms all share one session state. It is a Client
           Component, but Server Components can still be passed as children.

@@ -46,7 +46,7 @@ function ServiceBrowserFallback() {
 
 export default function ServicesPage() {
   return (
-    <main className="min-h-screen bg-ivory py-12 sm:py-16">
+    <main id="main-content" className="min-h-screen bg-ivory py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-rose-gold">

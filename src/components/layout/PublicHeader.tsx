@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, LogOut, Menu, X } from "lucide-react";
@@ -79,7 +79,7 @@ function AuthActions({ onNavigate }: AuthActionsProps) {
         <Link
           href={ROUTES.signIn}
           onClick={onNavigate}
-          className="hidden rounded-full px-4 py-2 text-sm font-bold text-plum hover:bg-blush-light sm:inline-flex"
+          className="hidden rounded-full px-4 py-2 text-sm font-bold text-plum hover:bg-blush-light focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold sm:inline-flex"
         >
           Sign in
         </Link>
@@ -108,7 +108,7 @@ function AuthActions({ onNavigate }: AuthActionsProps) {
         <Link
           href={dashboardForRole(user.role)}
           onClick={onNavigate}
-          className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-plum hover:bg-blush-light"
+          className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-plum hover:bg-blush-light focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold"
         >
           <LayoutDashboard aria-hidden="true" className="h-4 w-4" />
           <span className="hidden lg:inline">Dashboard</span>
@@ -140,6 +140,20 @@ export function PublicHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
 
+  // Escape is the expected keyboard shortcut for closing any temporary overlay.
+  // The mobile menu is small, but supporting it keeps navigation predictable for
+  // keyboard and screen-reader users.
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
+
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-ivory/95 backdrop-blur">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
@@ -151,11 +165,11 @@ export function PublicHeader() {
               key={link.href}
               href={link.href}
               aria-current={isActive(pathname, link) ? "page" : undefined}
-              className={
+              className={`rounded-full px-1 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold ${
                 isActive(pathname, link)
                   ? "text-sm font-bold text-rose-gold"
                   : "text-sm font-medium text-muted transition-colors hover:text-plum"
-              }
+              }`}
             >
               {link.label}
             </Link>
@@ -198,7 +212,7 @@ export function PublicHeader() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="rounded-xl px-3 py-2.5 text-sm font-bold text-plum hover:bg-blush-light"
+                className="rounded-xl px-3 py-2.5 text-sm font-bold text-plum hover:bg-blush-light focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold"
               >
                 {link.label}
               </Link>

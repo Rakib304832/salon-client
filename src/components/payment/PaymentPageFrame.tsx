@@ -25,7 +25,9 @@ export function PaymentPageFrame({ children }: PaymentPageFrameProps) {
           <Logo />
         </div>
       </header>
-      <main className="mx-auto max-w-2xl px-4 py-12 sm:py-16">{children}</main>
+      <main id="main-content" className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+        {children}
+      </main>
     </div>
   );
 }

@@ -37,7 +37,7 @@ export function AccountBlocked() {
   }
 
   return (
-    <main className="flex min-h-[70vh] items-center justify-center px-4 py-16">
+    <main id="main-content" className="flex min-h-[70vh] items-center justify-center px-4 py-16">
       <div className="w-full max-w-lg rounded-card border border-line bg-white p-8 text-center shadow-sm">
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-status-blocked-bg text-status-blocked-text">
           <LockKeyhole aria-hidden="true" className="h-8 w-8" />

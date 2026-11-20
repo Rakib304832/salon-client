@@ -225,6 +225,9 @@ export function AdminUsers() {
         <div className="overflow-hidden rounded-card border border-line bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
+              <caption className="sr-only">
+                Registered users with role, account state and available management actions.
+              </caption>
               <thead className="bg-blush-light text-xs uppercase tracking-wider text-muted">
                 <tr>
                   <th scope="col" className="px-5 py-3 font-bold">Account</th>

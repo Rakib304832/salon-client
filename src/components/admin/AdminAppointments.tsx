@@ -284,6 +284,9 @@ export function AdminAppointments() {
         <div className="overflow-hidden rounded-card border border-line bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[980px] text-left text-sm">
+              <caption className="sr-only">
+                All salon appointments with customer, schedule, status, payment and actions.
+              </caption>
               <thead className="bg-blush-light text-xs uppercase tracking-wider text-muted">
                 <tr>
                   <th scope="col" className="px-5 py-3 font-bold">Customer</th>
