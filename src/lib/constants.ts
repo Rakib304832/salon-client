@@ -58,6 +58,14 @@ export const SORT_OPTIONS = [
 export type ServiceSort = "" | "price_asc" | "price_desc";
 
 /**
+ * URL query values are user-controlled. Only these three sort values are valid
+ * in the server contract, so anything else is treated as "Recommended".
+ */
+export function isServiceSort(value: string): value is ServiceSort {
+  return value === "" || value === "price_asc" || value === "price_desc";
+}
+
+/**
  * Central route map. Using these instead of raw strings prevents typos in
  * redirects, guards, and return URLs.
  */
