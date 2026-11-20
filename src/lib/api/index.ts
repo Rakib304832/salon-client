@@ -14,7 +14,7 @@ export { appointmentsApi } from "./appointments";
 export type { AdminAppointmentQuery } from "./appointments";
 export { paymentsApi } from "./payments";
 export { servicesApi } from "./services";
-export type { ServiceQuery } from "./services";
+export type { AdminServiceInput, ServiceQuery } from "./services";
 export { statsApi } from "./stats";
 export { transactionsApi } from "./transactions";
 export type { TransactionQuery } from "./transactions";

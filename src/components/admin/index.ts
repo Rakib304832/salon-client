@@ -5,3 +5,6 @@
  * shell and status badge conventions as the rest of the application.
  */
 export { AdminOverview } from "./AdminOverview";
+export { ServiceForm } from "./ServiceForm";
+export type { ServiceFormProps } from "./ServiceForm";
+export { ServiceManager } from "./ServiceManager";

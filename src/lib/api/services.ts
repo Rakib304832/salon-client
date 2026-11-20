@@ -1,5 +1,12 @@
 import { api } from "./client";
 import type { Service, ServiceInput, ServiceStatus } from "@/types";
+
+/**
+ * The server's create/update schemas accept content fields only. Status has a
+ * dedicated PATCH route, so omitting it here prevents an admin form from
+ * accidentally sending a value the server would ignore.
+ */
+export type AdminServiceInput = Omit<ServiceInput, "status">;
 import type { ServiceSort } from "@/lib/constants";
 
 export interface ServiceQuery {
@@ -30,11 +37,11 @@ export const servicesApi = {
     return api.get<Service[]>("/api/admin/services", { params });
   },
 
-  create(input: ServiceInput) {
+  create(input: AdminServiceInput) {
     return api.post<Service>("/api/services", { body: input });
   },
 
-  update(id: string, input: Partial<ServiceInput>) {
+  update(id: string, input: Partial<AdminServiceInput>) {
     return api.put<Service>(`/api/services/${encodeURIComponent(id)}`, {
       body: input,
     });

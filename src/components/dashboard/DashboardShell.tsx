@@ -9,6 +9,7 @@ import {
   LogOut,
   Sparkles,
   UserRound,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/components/providers";
@@ -50,6 +51,7 @@ const DASHBOARD_NAV: Record<DashboardArea, DashboardNavItem[]> = {
   ],
   admin: [
     { href: ROUTES.adminDashboard, label: "Overview", icon: LayoutDashboard },
+    { href: ROUTES.adminServices, label: "Services", icon: Wrench },
   ],
 };
 

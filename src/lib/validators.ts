@@ -118,21 +118,39 @@ export const profileSchema = z.object({
 });
 export type ProfileInput = z.infer<typeof profileSchema>;
 
+/**
+ * Admin service form limits mirror the server's Zod route schema exactly.
+ *
+ * `status` is deliberately absent: new services start active on the server, and
+ * changing status uses the dedicated PATCH /:id/status route. Including status in
+ * a PUT would be stripped by the server and could silently mislead the admin.
+ */
 export const serviceFormSchema = z.object({
-  serviceName: z.string().trim().min(2, "Enter a service name."),
+  serviceName: z
+    .string()
+    .trim()
+    .min(2, "Enter at least 2 characters.")
+    .max(100, "Keep the service name under 100 characters."),
   category: z.enum(API_CATEGORIES, "Choose a service category."),
   description: z
     .string()
     .trim()
-    .min(10, "Write at least 10 characters about this service."),
-  price: z.coerce.number().positive("Price must be a positive number."),
+    .min(10, "Write at least 10 characters about this service.")
+    .max(2000, "Keep the description under 2000 characters."),
+  price: z.coerce
+    .number()
+    .positive("Price must be greater than 0.")
+    .max(100000, "Price cannot exceed 100000."),
   duration: z.coerce
     .number()
     .int("Duration must be a whole number of minutes.")
-    .positive("Duration must be a positive number."),
-  image: z.string().min(1, "Upload a service image."),
-  status: z.enum(["active", "inactive"]),
+    .positive("Duration must be greater than 0.")
+    .max(600, "Duration cannot exceed 600 minutes."),
+  // The value is either a pasted URL or the URL returned by /api/uploads.
+  image: z.string().url("Upload an image or enter a valid image URL."),
 });
+/** Raw field values are strings from number inputs; parsed values are numbers. */
+export type ServiceFormValues = z.input<typeof serviceFormSchema>;
 export type ServiceFormInput = z.infer<typeof serviceFormSchema>;
 
 /** Helper for inline field errors from react-hook-form + server 400 responses. */
