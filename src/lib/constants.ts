@@ -85,6 +85,11 @@ export const ROUTES = {
   adminProfile: "/dashboard/admin/profile",
   paymentSuccess: "/payment/success",
   paymentCancel: "/payment/cancel",
+  // Stripe's success/cancel URLs are built on the server and hardcode /booking.
+  // We keep the /payment paths from the brief as readable aliases and register
+  // both URL pairs in the App Router so either contract works in production.
+  bookingSuccess: "/booking/success",
+  bookingCancel: "/booking/cancel",
   accessDenied: "/access-denied",
   accountBlocked: "/account-blocked",
 } as const;

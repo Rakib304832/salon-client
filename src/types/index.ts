@@ -191,10 +191,35 @@ export interface CheckoutResponse {
   sessionId: string;
 }
 
+/**
+ * GET /api/payments/session/:sessionId returns deliberately small summaries,
+ * not full Transaction/Appointment documents. Modelling them as the complete
+ * types would hide the fact that fields such as customerId are absent on the
+ * success page.
+ */
+export interface PaymentTransactionSummary {
+  _id: string;
+  status: TransactionStatus;
+  /** Stripe smallest currency unit; divide by 100 before display. */
+  amount: number;
+  currency: string;
+  createdAt: string;
+}
+
+export interface PaymentAppointmentSummary {
+  _id: string;
+  status: AppointmentStatus;
+  paymentStatus: PaymentStatus;
+  appointmentDate: string;
+  timeSlot: string;
+  servicePrice: number;
+  serviceName: string;
+}
+
 export interface PaymentSessionResponse {
   sessionId: string;
-  transaction?: Transaction | null;
-  appointment?: Appointment | null;
+  transaction?: PaymentTransactionSummary | null;
+  appointment?: PaymentAppointmentSummary | null;
   confirmed: boolean;
 }
 
