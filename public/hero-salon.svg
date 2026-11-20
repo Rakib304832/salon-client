@@ -1,0 +1,69 @@
+<!--
+  Local hero illustration for the SalonBook home banner.
+
+  It is an SVG (no network request, no external image host) so the hero always
+  renders even before the Express API or ImgBB is configured. next/image serves
+  SVG assets unoptimized, which is the recommended behaviour for vector art.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900" role="img" aria-label="Illustration of a calm salon interior with a mirror, chair and plants">
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FAEDE8"/>
+      <stop offset="1" stop-color="#F3DDD5"/>
+    </linearGradient>
+    <linearGradient id="mirror" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.55" stop-color="#FFFFFF" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#C9977E" stop-opacity="0.35"/>
+    </linearGradient>
+    <linearGradient id="chair" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5C3A50"/>
+      <stop offset="1" stop-color="#2E1A28"/>
+    </linearGradient>
+    <linearGradient id="shelf" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4A2C3F"/>
+      <stop offset="1" stop-color="#6B465D"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="900" fill="url(#background)"/>
+  <circle cx="630" cy="170" r="210" fill="#FFFFFF" opacity="0.28"/>
+  <circle cx="120" cy="760" r="180" fill="#C9977E" opacity="0.12"/>
+
+  <!-- Large salon mirror -->
+  <rect x="205" y="70" width="390" height="560" rx="195" fill="url(#mirror)" stroke="#4A2C3F" stroke-width="14"/>
+  <path d="M250 470 C300 380 500 380 550 470" fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round" opacity="0.55"/>
+  <ellipse cx="400" cy="250" rx="120" ry="150" fill="#FFFFFF" opacity="0.35"/>
+
+  <!-- Floating shelf and products -->
+  <rect x="520" y="520" width="210" height="16" rx="8" fill="url(#shelf)"/>
+  <rect x="548" y="452" width="34" height="68" rx="10" fill="#C9977E"/>
+  <rect x="594" y="430" width="42" height="90" rx="12" fill="#4A2C3F"/>
+  <rect x="648" y="468" width="30" height="52" rx="9" fill="#FFFFFF" opacity="0.8"/>
+
+  <!-- Salon chair -->
+  <ellipse cx="400" cy="640" rx="170" ry="42" fill="#4A2C3F" opacity="0.14"/>
+  <path d="M300 520 Q400 470 500 520 L500 700 Q400 740 300 700 Z" fill="url(#chair)"/>
+  <rect x="285" y="640" width="230" height="95" rx="42" fill="url(#chair)"/>
+  <rect x="382" y="730" width="36" height="75" rx="14" fill="#4A2C3F"/>
+  <ellipse cx="400" cy="815" rx="105" ry="20" fill="#2E1A28"/>
+
+  <!-- Plant on the left -->
+  <path d="M132 690 C95 630 110 575 155 545 C163 600 155 645 132 690 Z" fill="#4F7557"/>
+  <path d="M160 690 C185 625 235 600 275 615 C245 665 205 690 160 690 Z" fill="#6D9A75"/>
+  <path d="M150 690 C150 635 165 595 200 570 C205 625 185 668 150 690 Z" fill="#3F6248"/>
+  <path d="M110 680 L205 680 L190 790 L125 790 Z" fill="#C9977E"/>
+  <rect x="104" y="670" width="107" height="22" rx="11" fill="#A87860"/>
+
+  <!-- Small plant on the right -->
+  <path d="M690 650 C665 610 675 570 710 550 C716 590 708 625 690 650 Z" fill="#4F7557"/>
+  <path d="M710 650 C735 610 770 600 790 610 C770 645 740 655 710 650 Z" fill="#6D9A75"/>
+  <path d="M670 645 L740 645 L730 725 L680 725 Z" fill="#4A2C3F"/>
+
+  <!-- Decorative sparkles -->
+  <g fill="#C9977E">
+    <path d="M135 210 L145 245 L180 255 L145 265 L135 300 L125 265 L90 255 L125 245 Z"/>
+    <path d="M650 300 L658 326 L684 334 L658 342 L650 368 L642 342 L616 334 L642 326 Z"/>
+    <path d="M560 130 L566 150 L586 156 L566 162 L560 182 L554 162 L534 156 L554 150 Z"/>
+  </g>
+</svg>

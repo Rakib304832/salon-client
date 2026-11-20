@@ -9,8 +9,18 @@
  */
 export { Badge, BlockedBadge, PaymentBadge, ServiceStatusBadge, StatusBadge } from "./Badge";
 export type { BadgeProps, BadgeTone } from "./Badge";
-export { Button, buttonStyles } from "./Button";
-export type { ButtonProps, ButtonSize, ButtonVariant } from "./Button";
+export { Button } from "./Button";
+export type { ButtonProps } from "./Button";
+/**
+ * buttonStyles is exported from the server-safe module, NOT from the client
+ * Button component. Server Components need to call it for <Link> styling.
+ */
+export { buttonStyles } from "./button-styles";
+export type {
+  ButtonSize,
+  ButtonStyleOptions,
+  ButtonVariant,
+} from "./button-styles";
 export { ConfirmDialog } from "./ConfirmDialog";
 export type { ConfirmDialogProps } from "./ConfirmDialog";
 export { CopyButton } from "./CopyButton";

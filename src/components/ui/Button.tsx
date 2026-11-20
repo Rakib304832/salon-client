@@ -2,60 +2,20 @@
 
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { Spinner } from "./Spinner";
-import { cn } from "@/lib/utils";
-
-export type ButtonVariant =
-  | "primary"
-  | "accent"
-  | "outline"
-  | "ghost"
-  | "danger";
-export type ButtonSize = "sm" | "md" | "lg";
-
-const variantStyles: Record<ButtonVariant, string> = {
-  // Plum is the primary brand colour and is used for main form actions.
-  primary: "bg-plum text-white hover:bg-plum-dark",
-  // Rose gold is the main call-to-action colour from the design tokens.
-  accent: "bg-rose-gold text-white hover:brightness-95",
-  outline: "border border-plum bg-white text-plum hover:bg-blush-light",
-  ghost: "bg-transparent text-plum hover:bg-blush-light",
-  danger: "bg-[#B24A4A] text-white hover:brightness-95",
-};
-
-const sizeStyles: Record<ButtonSize, string> = {
-  sm: "h-9 px-4 text-xs",
-  md: "h-11 px-5 text-sm",
-  lg: "h-12 px-7 text-sm",
-};
-
-export interface ButtonStyleOptions {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  fullWidth?: boolean;
-  loading?: boolean;
-  className?: string;
-}
+import { buttonStyles } from "./button-styles";
+import type { ButtonStyleOptions } from "./button-styles";
 
 /**
- * buttonStyles is exported so <Link> elements can look exactly like buttons
- * without nesting a <button> inside an <a> (which is invalid HTML).
+ * The style builder lives in ./button-styles (without "use client") so Server
+ * Components can call it for <Link> styling. Re-exporting here keeps older
+ * direct imports from "./Button" working.
  */
-export function buttonStyles({
-  variant = "primary",
-  size = "md",
-  fullWidth = false,
-  loading = false,
-  className,
-}: ButtonStyleOptions = {}): string {
-  return cn(
-    "inline-flex items-center justify-center gap-2 rounded-full font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
-    variantStyles[variant],
-    sizeStyles[size],
-    fullWidth && "w-full",
-    loading && "pointer-events-none",
-    className,
-  );
-}
+export { buttonStyles } from "./button-styles";
+export type {
+  ButtonSize,
+  ButtonStyleOptions,
+  ButtonVariant,
+} from "./button-styles";
 
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
