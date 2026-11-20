@@ -1,4 +1,4 @@
-import type { Appointment, Service } from "@/types";
+import type { Appointment, Service, User } from "@/types";
 
 /**
  * APPOINTMENT PRESENTATION HELPERS
@@ -37,6 +37,32 @@ export function appointmentServiceId(appointment: Appointment): string {
 /** Human-readable service name with a safe fallback for deleted services. */
 export function appointmentServiceName(appointment: Appointment): string {
   return appointmentService(appointment)?.serviceName ?? "Salon service";
+}
+
+/**
+ * Narrow a possible populated customer without trusting arbitrary API data.
+ * Admin endpoints populate customerId; customer endpoints leave it a string.
+ */
+function isPopulatedUser(value: unknown): value is User {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    "email" in value &&
+    typeof (value as { email?: unknown }).email === "string"
+  );
+}
+
+/** Return the safe customer document when the endpoint supplied one. */
+export function appointmentCustomer(appointment: Appointment): User | null {
+  if (isPopulatedUser(appointment.customerId)) return appointment.customerId;
+  return appointment.customerInfo ?? null;
+}
+
+/** Human-readable customer name with a safe fallback for removed accounts. */
+export function appointmentCustomerName(appointment: Appointment): string {
+  const customer = appointmentCustomer(appointment);
+  return customer?.name?.trim() || customer?.email || "Unknown customer";
 }
 
 /** Only a pending, unpaid request can be cancelled by the customer. */
