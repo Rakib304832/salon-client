@@ -67,6 +67,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const requestId = useRef(0);
 
+  /**
+   * Initial mount check.
+   *
+   * State already starts as "loading", so this function never writes state
+   * synchronously. Every setState happens after an await, which lets React
+   * treat this as subscribing to an external system (the session cookie) rather
+   * than as a cascading render inside the effect body.
+   */
+  const initialise = useCallback(async (): Promise<void> => {
+    const currentRequest = ++requestId.current;
+
+    try {
+      const session = await getClientSession();
+      if (currentRequest !== requestId.current) return;
+
+      if (!session) {
+        setUserState(null);
+        setStatus("unauthenticated");
+        return;
+      }
+
+      const freshUser = await getFreshUser(session);
+      if (currentRequest !== requestId.current) return;
+
+      setUserState(freshUser);
+      setStatus(freshUser ? "authenticated" : "unauthenticated");
+    } catch (caught) {
+      if (currentRequest !== requestId.current) return;
+
+      setUserState(null);
+      setStatus("unauthenticated");
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Unable to check your session. Please try again.",
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    // This is an asynchronous subscription to the browser session, not a
+    // derived-state effect: all writes happen after network promises resolve.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- session bootstrap is an external-system sync
+    void initialise();
+  }, [initialise]);
+
+  /**
+   * Explicit refresh used by auth forms and retry buttons.
+   *
+   * Unlike the initial check, a refresh should visibly show a loading state,
+   * so those setState calls belong in an event-handler-owned function.
+   */
   const load = useCallback(async (): Promise<User | null> => {
     const currentRequest = ++requestId.current;
     setStatus("loading");
@@ -82,8 +134,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null;
       }
 
-      // getFreshUser() handles 401 (stale cookie), 403 (blocked account) and
-      // network failures, so the provider receives a decision-ready value.
       const freshUser = await getFreshUser(session);
       if (currentRequest !== requestId.current) return null;
 
@@ -104,9 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const refresh = useCallback(() => load(), [load]);
 
   /** Local update used by the profile page after a successful PATCH. */
   const setUser = useCallback((nextUser: User | null) => {
@@ -117,7 +165,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOutUser = useCallback(async () => {
     // Invalidate any in-flight refresh before clearing state.
     requestId.current += 1;
-    await authSignOut();
+
+    const result = await authSignOut();
+    if (result?.error) {
+      throw new Error(result.error.message ?? "Unable to sign out.");
+    }
+
     setUserState(null);
     setStatus("unauthenticated");
     setError(null);
@@ -140,12 +193,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: status === "authenticated" && Boolean(user),
       isBlocked: user?.isBlocked === true,
       error,
-      refresh: load,
+      refresh,
       setUser,
       signOutUser,
       hasRole,
     }),
-    [user, status, error, load, setUser, signOutUser, hasRole],
+    [user, status, error, refresh, setUser, signOutUser, hasRole],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

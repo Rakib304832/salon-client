@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { ErrorState, Spinner } from "@/components/ui";
+import { dashboardForRole } from "@/lib/auth";
 import { ROUTES } from "@/lib/constants";
 import type { UserRole } from "@/types";
 import { AccessDenied } from "./AccessDenied";
@@ -110,11 +111,7 @@ export function GuestOnly({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (status !== "authenticated" || !user || isBlocked) return;
-    router.replace(
-      user.role === "admin"
-        ? ROUTES.adminDashboard
-        : ROUTES.customerDashboard,
-    );
+    router.replace(dashboardForRole(user.role));
   }, [status, user, isBlocked, router]);
 
   if (status === "loading") return <GuardLoading />;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LockKeyhole } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { Button, buttonStyles } from "@/components/ui";
+import { buttonStyles } from "@/components/ui";
 import { ROUTES } from "@/lib/constants";
 import { toastError } from "@/lib/toast";
 

@@ -1,3 +1,4 @@
+import { ROUTES } from "@/lib/constants";
 import type {
   ApiEnvelope,
   ApiErrorDetail,
@@ -144,10 +145,16 @@ function extractFailure(payload: unknown, statusText: string) {
 
 function redirectToSignIn(): void {
   if (typeof window === "undefined") return;
-  if (window.location.pathname === "/sign-in") return;
+  if (window.location.pathname === ROUTES.signIn) return;
 
   const returnTo = `${window.location.pathname}${window.location.search}`;
-  window.location.assign(`/sign-in?returnTo=${encodeURIComponent(returnTo)}`);
+
+  // A 401 can arrive from any async API call, not from a component event. A
+  // full-document navigation is therefore correct here. Building an absolute
+  // URL also avoids Next.js's "relative location.assign" lint warning.
+  const target = new URL(ROUTES.signIn, window.location.origin);
+  target.searchParams.set("returnTo", returnTo);
+  window.location.assign(target.toString());
 }
 
 export async function apiFetch<T>(

@@ -3,6 +3,7 @@
 import { ApiError, API_BASE_URL } from "./api/client";
 import { usersApi } from "./api/users";
 import { authClient } from "./auth-client";
+import { ROUTES } from "./constants";
 import type { ClientSession, User, UserRole } from "@/types";
 import type { SignInInput, SignUpInput } from "./validators";
 
@@ -13,6 +14,11 @@ import type { SignInInput, SignUpInput } from "./validators";
  * That keeps Google callback URLs, error handling, and the role/isBlocked cast
  * in one place.
  */
+
+/** Role-to-dashboard mapping used by guards and auth forms. */
+export function dashboardForRole(role: UserRole): string {
+  return role === "admin" ? ROUTES.adminDashboard : ROUTES.customerDashboard;
+}
 
 /**
  * Better Auth's session user does not know our extra fields at type level.

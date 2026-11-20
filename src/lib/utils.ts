@@ -123,3 +123,29 @@ export function getInitials(name: string): string {
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
 }
+
+/**
+ * Validates a `returnTo` value before the router follows it.
+ *
+ * Route guards create returnTo values like `/dashboard/customer?tab=upcoming`.
+ * A query string is user-controlled, so we must not allow:
+ * - `https://evil.example` (external redirect)
+ * - `//evil.example` (protocol-relative external redirect)
+ * - backslashes or newlines (browser normalisation tricks)
+ *
+ * Anything that is not a clean single-slash internal path falls back to the
+ * caller's safe destination. This prevents open-redirect attacks on sign-in.
+ */
+export function safeRedirectPath(
+  value: string | null | undefined,
+  fallback: string,
+): string {
+  if (!value) return fallback;
+
+  const path = value.trim();
+  if (!path.startsWith("/")) return fallback;
+  if (path.startsWith("//")) return fallback;
+  if (path.includes("\\") || /[\r\n]/.test(path)) return fallback;
+
+  return path;
+}
