@@ -281,98 +281,116 @@ export function AdminAppointments() {
           icon={<CalendarDays aria-hidden="true" className="h-6 w-6" />}
         />
       ) : (
-        <div className="overflow-hidden rounded-card border border-line bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-left text-sm">
-              <caption className="sr-only">
-                All salon appointments with customer, schedule, status, payment and actions.
-              </caption>
-              <thead className="bg-blush-light text-xs uppercase tracking-wider text-muted">
-                <tr>
-                  <th scope="col" className="px-5 py-3 font-bold">Customer</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Service</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Schedule</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Price</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Status</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Payment</th>
-                  <th scope="col" className="px-5 py-3 text-right font-bold">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {items.map((appointment) => (
-                  <tr key={appointment._id}>
-                    <td className="px-5 py-4">
-                      <p className="font-bold text-plum">
-                        {appointmentCustomerName(appointment)}
-                      </p>
-                      <p className="mt-0.5 text-xs text-muted">
-                        Requested {formatDate(appointment.createdAt)}
-                      </p>
-                    </td>
-                    <td className="px-5 py-4 text-muted">
-                      {appointmentServiceName(appointment)}
-                    </td>
-                    <td className="px-5 py-4">
-                      <p className="font-bold text-plum">
-                        {formatDate(appointment.appointmentDate)}
-                      </p>
-                      <p className="mt-0.5 text-xs text-muted">
-                        {appointment.timeSlot}
-                      </p>
-                    </td>
-                    <td className="px-5 py-4 font-bold text-plum">
-                      {formatCurrency(appointment.servicePrice)}
-                    </td>
-                    <td className="px-5 py-4">
-                      <StatusBadge status={appointment.status} />
-                    </td>
-                    <td className="px-5 py-4">
-                      <PaymentBadge status={appointment.paymentStatus} />
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex flex-wrap justify-end gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDetailsTarget(appointment)}
-                        >
-                          <Eye aria-hidden="true" className="h-3.5 w-3.5" />
-                          Details
-                        </Button>
-
-                        {appointment.status === "pending" ? (
-                          <Button
-                            variant="accent"
-                            size="sm"
-                            loading={isBusy(appointment._id, "confirm")}
-                            disabled={busy !== null}
-                            onClick={() => void handleConfirm(appointment)}
-                          >
-                            <Check aria-hidden="true" className="h-3.5 w-3.5" />
-                            Confirm
-                          </Button>
-                        ) : null}
-
-                        {appointment.status !== "cancelled" ? (
+        <>
+          {/* Desktop keeps the dense table; small screens use stacked cards so
+              all booking details remain readable without sideways scrolling. */}
+          <div className="hidden overflow-hidden rounded-card border border-line bg-white shadow-sm md:block">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[980px] text-left text-sm">
+                <caption className="sr-only">
+                  All salon appointments with customer, schedule, status, payment and actions.
+                </caption>
+                <thead className="bg-blush-light text-xs uppercase tracking-wider text-muted">
+                  <tr>
+                    <th scope="col" className="px-5 py-3 font-bold">Customer</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Service</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Schedule</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Price</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Status</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Payment</th>
+                    <th scope="col" className="px-5 py-3 text-right font-bold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {items.map((appointment) => (
+                    <tr key={appointment._id}>
+                      <td className="px-5 py-4">
+                        <p className="font-bold text-plum">
+                          {appointmentCustomerName(appointment)}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted">
+                          Requested {formatDate(appointment.createdAt)}
+                        </p>
+                      </td>
+                      <td className="px-5 py-4 text-muted">
+                        {appointmentServiceName(appointment)}
+                      </td>
+                      <td className="px-5 py-4">
+                        <p className="font-bold text-plum">
+                          {formatDate(appointment.appointmentDate)}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted">
+                          {appointment.timeSlot}
+                        </p>
+                      </td>
+                      <td className="px-5 py-4 font-bold text-plum">
+                        {formatCurrency(appointment.servicePrice)}
+                      </td>
+                      <td className="px-5 py-4">
+                        <StatusBadge status={appointment.status} />
+                      </td>
+                      <td className="px-5 py-4">
+                        <PaymentBadge status={appointment.paymentStatus} />
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex flex-wrap justify-end gap-1.5">
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-[#B24A4A] hover:bg-[#FCEDED]"
-                            disabled={busy !== null}
-                            onClick={() => setCancelTarget(appointment)}
+                            onClick={() => setDetailsTarget(appointment)}
                           >
-                            <XCircle aria-hidden="true" className="h-3.5 w-3.5" />
-                            Cancel
+                            <Eye aria-hidden="true" className="h-3.5 w-3.5" />
+                            Details
                           </Button>
-                        ) : null}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+                          {appointment.status === "pending" ? (
+                            <Button
+                              variant="accent"
+                              size="sm"
+                              loading={isBusy(appointment._id, "confirm")}
+                              disabled={busy !== null}
+                              onClick={() => void handleConfirm(appointment)}
+                            >
+                              <Check aria-hidden="true" className="h-3.5 w-3.5" />
+                              Confirm
+                            </Button>
+                          ) : null}
+
+                          {appointment.status !== "cancelled" ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-[#B24A4A] hover:bg-[#FCEDED]"
+                              disabled={busy !== null}
+                              onClick={() => setCancelTarget(appointment)}
+                            >
+                              <XCircle aria-hidden="true" className="h-3.5 w-3.5" />
+                              Cancel
+                            </Button>
+                          ) : null}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+
+          <div className="space-y-3 md:hidden">
+            {items.map((appointment) => (
+              <AppointmentMobileCard
+                key={appointment._id}
+                appointment={appointment}
+                busy={busy?.id === appointment._id ? busy.kind : null}
+                disabled={busy !== null}
+                onDetails={() => setDetailsTarget(appointment)}
+                onConfirm={() => void handleConfirm(appointment)}
+                onCancel={() => setCancelTarget(appointment)}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       <Modal
@@ -465,5 +483,103 @@ function DetailItem({ label, value }: { label: string; value: string }) {
       </p>
       <p className="mt-1 font-bold text-plum">{value}</p>
     </div>
+  );
+}
+
+/**
+ * Mobile appointment equivalent of the table rows. The details dialog, confirm
+ * and cancel handlers are the same callbacks used by the desktop table, so the
+ * two layouts cannot disagree about which action is available.
+ */
+interface AppointmentMobileCardProps {
+  appointment: Appointment;
+  busy: BusyAction["kind"] | null;
+  disabled: boolean;
+  onDetails: () => void;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function AppointmentMobileCard({
+  appointment,
+  busy,
+  disabled,
+  onDetails,
+  onConfirm,
+  onCancel,
+}: AppointmentMobileCardProps) {
+  return (
+    <article className="rounded-card border border-line bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-bold text-plum">
+            {appointmentCustomerName(appointment)}
+          </p>
+          <p className="mt-0.5 text-xs text-muted">
+            Requested {formatDate(appointment.createdAt)}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <StatusBadge status={appointment.status} />
+          <PaymentBadge status={appointment.paymentStatus} />
+        </div>
+      </div>
+
+      <dl className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-ivory p-3 text-xs">
+        <div>
+          <dt className="text-muted">Service</dt>
+          <dd className="mt-0.5 font-bold text-plum">
+            {appointmentServiceName(appointment)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted">Price</dt>
+          <dd className="mt-0.5 font-bold text-plum">
+            {formatCurrency(appointment.servicePrice)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted">Date</dt>
+          <dd className="mt-0.5 font-bold text-plum">
+            {formatDate(appointment.appointmentDate)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted">Time</dt>
+          <dd className="mt-0.5 font-bold text-plum">{appointment.timeSlot}</dd>
+        </div>
+      </dl>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button variant="ghost" size="sm" onClick={onDetails}>
+          <Eye aria-hidden="true" className="h-3.5 w-3.5" />
+          Details
+        </Button>
+        {appointment.status === "pending" ? (
+          <Button
+            variant="accent"
+            size="sm"
+            loading={busy === "confirm"}
+            disabled={disabled}
+            onClick={onConfirm}
+          >
+            <Check aria-hidden="true" className="h-3.5 w-3.5" />
+            Confirm
+          </Button>
+        ) : null}
+        {appointment.status !== "cancelled" ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-[#B24A4A] hover:bg-[#FCEDED]"
+            disabled={disabled}
+            onClick={onCancel}
+          >
+            <XCircle aria-hidden="true" className="h-3.5 w-3.5" />
+            Cancel
+          </Button>
+        ) : null}
+      </div>
+    </article>
   );
 }

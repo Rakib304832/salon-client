@@ -222,89 +222,117 @@ export function AdminUsers() {
           icon={<Users aria-hidden="true" className="h-6 w-6" />}
         />
       ) : (
-        <div className="overflow-hidden rounded-card border border-line bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <caption className="sr-only">
-                Registered users with role, account state and available management actions.
-              </caption>
-              <thead className="bg-blush-light text-xs uppercase tracking-wider text-muted">
-                <tr>
-                  <th scope="col" className="px-5 py-3 font-bold">Account</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Role</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Phone</th>
-                  <th scope="col" className="px-5 py-3 font-bold">State</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Joined</th>
-                  <th scope="col" className="px-5 py-3 text-right font-bold">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {items.map((item) => {
-                  const isCurrentUser = item.id === currentUser?.id;
-                  const canManage = item.role === "customer" && !isCurrentUser;
+        <>
+          {/* Desktop table for dense account lists; mobile cards preserve the
+              same role/state information and block action without scrolling. */}
+          <div className="hidden overflow-hidden rounded-card border border-line bg-white shadow-sm md:block">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <caption className="sr-only">
+                  Registered users with role, account state and available management actions.
+                </caption>
+                <thead className="bg-blush-light text-xs uppercase tracking-wider text-muted">
+                  <tr>
+                    <th scope="col" className="px-5 py-3 font-bold">Account</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Role</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Phone</th>
+                    <th scope="col" className="px-5 py-3 font-bold">State</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Joined</th>
+                    <th scope="col" className="px-5 py-3 text-right font-bold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {items.map((item) => {
+                    const isCurrentUser = item.id === currentUser?.id;
+                    const canManage = item.role === "customer" && !isCurrentUser;
 
-                  return (
-                    <tr key={item.id}>
-                      <td className="px-5 py-4">
-                        <p className="font-bold text-plum">{item.name}</p>
-                        <p className="mt-0.5 text-xs text-muted">{item.email}</p>
-                      </td>
-                      <td className="px-5 py-4">
-                        <Badge tone={item.role === "admin" ? "plum" : "neutral"}>
-                          {item.role === "admin" ? (
-                            <ShieldCheck aria-hidden="true" className="h-3 w-3" />
-                          ) : null}
-                          {item.role === "admin" ? "Admin" : "Customer"}
-                        </Badge>
-                      </td>
-                      <td className="px-5 py-4 text-muted">{item.phone || "—"}</td>
-                      <td className="px-5 py-4">
-                        <BlockedBadge isBlocked={item.isBlocked} />
-                      </td>
-                      <td className="px-5 py-4 text-muted">
-                        {formatDate(item.createdAt)}
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex justify-end">
-                          {canManage ? (
-                            <Button
-                              variant={item.isBlocked ? "outline" : "ghost"}
-                              size="sm"
-                              loading={busyId === item.id}
-                              disabled={busyId !== null}
-                              className={
-                                item.isBlocked
-                                  ? undefined
-                                  : "text-[#B24A4A] hover:bg-[#FCEDED]"
-                              }
-                              onClick={() =>
-                                setBlockTarget({
-                                  user: item,
-                                  nextBlocked: !item.isBlocked,
-                                })
-                              }
-                            >
-                              {item.isBlocked ? (
-                                <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5" />
-                              ) : (
-                                <UserRoundX aria-hidden="true" className="h-3.5 w-3.5" />
-                              )}
-                              {item.isBlocked ? "Unblock" : "Block"}
-                            </Button>
-                          ) : (
-                            <span className="text-xs text-muted">
-                              {isCurrentUser ? "Your account" : "Protected"}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                    return (
+                      <tr key={item.id}>
+                        <td className="px-5 py-4">
+                          <p className="font-bold text-plum">{item.name}</p>
+                          <p className="mt-0.5 text-xs text-muted">{item.email}</p>
+                        </td>
+                        <td className="px-5 py-4">
+                          <Badge tone={item.role === "admin" ? "plum" : "neutral"}>
+                            {item.role === "admin" ? (
+                              <ShieldCheck aria-hidden="true" className="h-3 w-3" />
+                            ) : null}
+                            {item.role === "admin" ? "Admin" : "Customer"}
+                          </Badge>
+                        </td>
+                        <td className="px-5 py-4 text-muted">{item.phone || "—"}</td>
+                        <td className="px-5 py-4">
+                          <BlockedBadge isBlocked={item.isBlocked} />
+                        </td>
+                        <td className="px-5 py-4 text-muted">
+                          {formatDate(item.createdAt)}
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex justify-end">
+                            {canManage ? (
+                              <Button
+                                variant={item.isBlocked ? "outline" : "ghost"}
+                                size="sm"
+                                loading={busyId === item.id}
+                                disabled={busyId !== null}
+                                className={
+                                  item.isBlocked
+                                    ? undefined
+                                    : "text-[#B24A4A] hover:bg-[#FCEDED]"
+                                }
+                                onClick={() =>
+                                  setBlockTarget({
+                                    user: item,
+                                    nextBlocked: !item.isBlocked,
+                                  })
+                                }
+                              >
+                                {item.isBlocked ? (
+                                  <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5" />
+                                ) : (
+                                  <UserRoundX aria-hidden="true" className="h-3.5 w-3.5" />
+                                )}
+                                {item.isBlocked ? "Unblock" : "Block"}
+                              </Button>
+                            ) : (
+                              <span className="text-xs text-muted">
+                                {isCurrentUser ? "Your account" : "Protected"}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+
+          <div className="space-y-3 md:hidden">
+            {items.map((item) => {
+              const isCurrentUser = item.id === currentUser?.id;
+              const canManage = item.role === "customer" && !isCurrentUser;
+
+              return (
+                <UserMobileCard
+                  key={item.id}
+                  user={item}
+                  isCurrentUser={isCurrentUser}
+                  canManage={canManage}
+                  busy={busyId === item.id}
+                  disabled={busyId !== null}
+                  onToggleBlock={() =>
+                    setBlockTarget({
+                      user: item,
+                      nextBlocked: !item.isBlocked,
+                    })
+                  }
+                />
+              );
+            })}
+          </div>
+        </>
       )}
 
       <ConfirmDialog
@@ -322,5 +350,83 @@ export function AdminUsers() {
         loading={busyId !== null}
       />
     </div>
+  );
+}
+
+/**
+ * Mobile user row. Role changes are still absent here: the only action is the
+ * same customer-only block/unblock callback used by the desktop table.
+ */
+interface UserMobileCardProps {
+  user: User;
+  isCurrentUser: boolean;
+  canManage: boolean;
+  busy: boolean;
+  disabled: boolean;
+  onToggleBlock: () => void;
+}
+
+function UserMobileCard({
+  user,
+  isCurrentUser,
+  canManage,
+  busy,
+  disabled,
+  onToggleBlock,
+}: UserMobileCardProps) {
+  return (
+    <article className="rounded-card border border-line bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-bold text-plum">{user.name}</p>
+          <p className="mt-0.5 break-all text-xs text-muted">{user.email}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge tone={user.role === "admin" ? "plum" : "neutral"}>
+            {user.role === "admin" ? "Admin" : "Customer"}
+          </Badge>
+          <BlockedBadge isBlocked={user.isBlocked} />
+        </div>
+      </div>
+
+      <dl className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-ivory p-3 text-xs">
+        <div>
+          <dt className="text-muted">Phone</dt>
+          <dd className="mt-0.5 font-bold text-plum">{user.phone || "—"}</dd>
+        </div>
+        <div>
+          <dt className="text-muted">Joined</dt>
+          <dd className="mt-0.5 font-bold text-plum">
+            {formatDate(user.createdAt)}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-4 flex justify-end">
+        {canManage ? (
+          <Button
+            variant={user.isBlocked ? "outline" : "ghost"}
+            size="sm"
+            loading={busy}
+            disabled={disabled}
+            className={
+              user.isBlocked ? undefined : "text-[#B24A4A] hover:bg-[#FCEDED]"
+            }
+            onClick={onToggleBlock}
+          >
+            {user.isBlocked ? (
+              <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5" />
+            ) : (
+              <UserRoundX aria-hidden="true" className="h-3.5 w-3.5" />
+            )}
+            {user.isBlocked ? "Unblock customer" : "Block customer"}
+          </Button>
+        ) : (
+          <span className="text-xs text-muted">
+            {isCurrentUser ? "Your account" : "Administrator accounts are protected"}
+          </span>
+        )}
+      </div>
+    </article>
   );
 }

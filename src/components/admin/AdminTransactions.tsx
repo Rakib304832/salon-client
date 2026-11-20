@@ -194,73 +194,88 @@ export function AdminTransactions() {
           icon={<ReceiptText aria-hidden="true" className="h-6 w-6" />}
         />
       ) : (
-        <div className="overflow-hidden rounded-card border border-line bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left text-sm">
-              <caption className="sr-only">
-                Stripe transactions with customer, service, amount and confirmation status.
-              </caption>
-              <thead className="bg-blush-light text-xs uppercase tracking-wider text-muted">
-                <tr>
-                  <th scope="col" className="px-5 py-3 font-bold">Date</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Customer</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Service</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Appointment</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Session</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Amount</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {items.map((transaction) => (
-                  <tr key={transaction._id}>
-                    <td className="px-5 py-4 text-muted">
-                      {formatDate(transaction.createdAt)}
-                    </td>
-                    <td className="px-5 py-4">
-                      <p className="font-bold text-plum">
-                        {transaction.customerInfo?.name || "Unknown customer"}
-                      </p>
-                      <p className="mt-0.5 text-xs text-muted">
-                        {transaction.customerInfo?.email || "—"}
-                      </p>
-                    </td>
-                    <td className="px-5 py-4 text-muted">
-                      {transaction.serviceInfo?.serviceName || "Service unavailable"}
-                    </td>
-                    <td className="px-5 py-4 text-muted">
-                      {formatDate(transaction.appointmentDate)}
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-1">
-                        <code className="rounded bg-ivory px-2 py-1 text-xs text-plum">
-                          {shortenSessionId(transaction.stripeSessionId)}
-                        </code>
-                        <CopyButton value={transaction.stripeSessionId} />
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 font-bold text-plum">
-                      {formatCurrency(
-                        transaction.amount / 100,
-                        transaction.currency.toUpperCase(),
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
-                      <Badge
-                        tone={
-                          transaction.status === "paid" ? "paid" : "blocked"
-                        }
-                      >
-                        <CreditCard aria-hidden="true" className="h-3 w-3" />
-                        {transaction.status === "paid" ? "Paid" : "Failed"}
-                      </Badge>
-                    </td>
+        <>
+          {/* Desktop keeps the dense seven-column table. Mobile cards expose the
+              same read-only payment facts without requiring horizontal scroll. */}
+          <div className="hidden overflow-hidden rounded-card border border-line bg-white shadow-sm md:block">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] text-left text-sm">
+                <caption className="sr-only">
+                  Stripe transactions with customer, service, amount and confirmation status.
+                </caption>
+                <thead className="bg-blush-light text-xs uppercase tracking-wider text-muted">
+                  <tr>
+                    <th scope="col" className="px-5 py-3 font-bold">Date</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Customer</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Service</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Appointment</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Session</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Amount</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {items.map((transaction) => (
+                    <tr key={transaction._id}>
+                      <td className="px-5 py-4 text-muted">
+                        {formatDate(transaction.createdAt)}
+                      </td>
+                      <td className="px-5 py-4">
+                        <p className="font-bold text-plum">
+                          {transaction.customerInfo?.name || "Unknown customer"}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted">
+                          {transaction.customerInfo?.email || "—"}
+                        </p>
+                      </td>
+                      <td className="px-5 py-4 text-muted">
+                        {transaction.serviceInfo?.serviceName || "Service unavailable"}
+                      </td>
+                      <td className="px-5 py-4 text-muted">
+                        {transaction.appointmentDate
+                          ? formatDate(transaction.appointmentDate)
+                          : "—"}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-1">
+                          <code className="rounded bg-ivory px-2 py-1 text-xs text-plum">
+                            {shortenSessionId(transaction.stripeSessionId)}
+                          </code>
+                          <CopyButton value={transaction.stripeSessionId} />
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 font-bold text-plum">
+                        {formatCurrency(
+                          transaction.amount / 100,
+                          transaction.currency.toUpperCase(),
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <Badge
+                          tone={
+                            transaction.status === "paid" ? "paid" : "blocked"
+                          }
+                        >
+                          <CreditCard aria-hidden="true" className="h-3 w-3" />
+                          {transaction.status === "paid" ? "Paid" : "Failed"}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+
+          <div className="space-y-3 md:hidden">
+            {items.map((transaction) => (
+              <TransactionMobileCard
+                key={transaction._id}
+                transaction={transaction}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       {/* Keeping this note visible prevents an admin from assuming a missing
@@ -270,5 +285,73 @@ export function AdminTransactions() {
         not modify its recorded Stripe transaction.
       </p>
     </div>
+  );
+}
+
+/**
+ * Mobile transaction card. This screen is read-only, so the card contains no
+ * action buttons: only the copied session identifier is available through the
+ * same CopyButton used by the desktop table.
+ */
+function TransactionMobileCard({
+  transaction,
+}: {
+  transaction: Transaction;
+}) {
+  const currency = transaction.currency.toUpperCase();
+
+  return (
+    <article className="rounded-card border border-line bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-bold text-plum">
+            {transaction.customerInfo?.name || "Unknown customer"}
+          </p>
+          <p className="mt-0.5 break-all text-xs text-muted">
+            {transaction.customerInfo?.email || "—"}
+          </p>
+        </div>
+        <Badge tone={transaction.status === "paid" ? "paid" : "blocked"}>
+          <CreditCard aria-hidden="true" className="h-3 w-3" />
+          {transaction.status === "paid" ? "Paid" : "Failed"}
+        </Badge>
+      </div>
+
+      <dl className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-ivory p-3 text-xs">
+        <div>
+          <dt className="text-muted">Date</dt>
+          <dd className="mt-0.5 font-bold text-plum">
+            {formatDate(transaction.createdAt)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted">Appointment</dt>
+          <dd className="mt-0.5 font-bold text-plum">
+            {transaction.appointmentDate
+              ? formatDate(transaction.appointmentDate)
+              : "—"}
+          </dd>
+        </div>
+        <div className="col-span-2">
+          <dt className="text-muted">Service</dt>
+          <dd className="mt-0.5 font-bold text-plum">
+            {transaction.serviceInfo?.serviceName || "Service unavailable"}
+          </dd>
+        </div>
+        <div className="col-span-2">
+          <dt className="text-muted">Amount</dt>
+          <dd className="mt-0.5 font-display text-lg font-semibold text-plum">
+            {formatCurrency(transaction.amount / 100, currency)}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-3 flex items-center gap-2">
+        <code className="min-w-0 flex-1 truncate rounded bg-ivory px-2 py-1 text-xs text-plum">
+          {shortenSessionId(transaction.stripeSessionId)}
+        </code>
+        <CopyButton value={transaction.stripeSessionId} />
+      </div>
+    </article>
   );
 }

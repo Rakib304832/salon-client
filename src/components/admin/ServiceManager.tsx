@@ -324,37 +324,55 @@ export function ServiceManager() {
           icon={<Scissors aria-hidden="true" className="h-6 w-6" />}
         />
       ) : (
-        <div className="overflow-hidden rounded-card border border-line bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[860px] text-left text-sm">
-              <caption className="sr-only">
-                Salon services with category, price, duration, availability and actions.
-              </caption>
-              <thead className="bg-blush-light text-xs uppercase tracking-wider text-muted">
-                <tr>
-                  <th scope="col" className="px-5 py-3 font-bold">Service</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Category</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Price</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Duration</th>
-                  <th scope="col" className="px-5 py-3 font-bold">Status</th>
-                  <th scope="col" className="px-5 py-3 text-right font-bold">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {visible.map((service) => (
-                  <ServiceRow
-                    key={service._id}
-                    service={service}
-                    busy={busy?.id === service._id ? busy.kind : null}
-                    onEdit={() => openEdit(service)}
-                    onToggleStatus={() => void handleToggleStatus(service)}
-                    onDelete={() => setDeleteTarget(service)}
-                  />
-                ))}
-              </tbody>
-            </table>
+        <>
+          {/* Desktop keeps the dense table; mobile gets full-width cards below
+              so admins never have to scroll a six-column grid sideways. */}
+          <div className="hidden overflow-hidden rounded-card border border-line bg-white shadow-sm md:block">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[860px] text-left text-sm">
+                <caption className="sr-only">
+                  Salon services with category, price, duration, availability and actions.
+                </caption>
+                <thead className="bg-blush-light text-xs uppercase tracking-wider text-muted">
+                  <tr>
+                    <th scope="col" className="px-5 py-3 font-bold">Service</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Category</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Price</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Duration</th>
+                    <th scope="col" className="px-5 py-3 font-bold">Status</th>
+                    <th scope="col" className="px-5 py-3 text-right font-bold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {visible.map((service) => (
+                    <ServiceRow
+                      key={service._id}
+                      service={service}
+                      busy={busy?.id === service._id ? busy.kind : null}
+                      onEdit={() => openEdit(service)}
+                      onToggleStatus={() => void handleToggleStatus(service)}
+                      onDelete={() => setDeleteTarget(service)}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+
+          <div className="space-y-3 md:hidden">
+            {visible.map((service) => (
+              <ServiceMobileCard
+                key={service._id}
+                service={service}
+                busy={busy?.id === service._id ? busy.kind : null}
+                disabled={busy !== null}
+                onEdit={() => openEdit(service)}
+                onToggleStatus={() => void handleToggleStatus(service)}
+                onDelete={() => setDeleteTarget(service)}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       <Modal
@@ -480,5 +498,100 @@ function ServiceRow({
         </div>
       </td>
     </tr>
+  );
+}
+
+/**
+ * Mobile equivalent of ServiceRow.
+ *
+ * The same handlers and busy state are passed in, so an action behaves
+ * identically whichever layout the viewport selected. Only the information
+ * arrangement changes: cards stack instead of forcing horizontal table scroll.
+ */
+interface ServiceMobileCardProps extends ServiceRowProps {
+  disabled: boolean;
+}
+
+function ServiceMobileCard({
+  service,
+  busy,
+  disabled,
+  onEdit,
+  onToggleStatus,
+  onDelete,
+}: ServiceMobileCardProps) {
+  const imageIsSafe = canRenderWithNextImage(service.image);
+
+  return (
+    <article className="rounded-card border border-line bg-white p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blush-light">
+          {imageIsSafe ? (
+            <Image
+              src={service.image}
+              alt=""
+              width={56}
+              height={56}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <ImageOff aria-hidden="true" className="h-6 w-6 text-muted" />
+          )}
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-bold text-plum">{service.serviceName}</p>
+          <p className="mt-0.5 text-xs text-muted">{service.category}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <ServiceStatusBadge status={service.status} />
+            <span className="text-sm font-bold text-plum">
+              {formatCurrency(service.price)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <dl className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-ivory p-3 text-xs">
+        <div>
+          <dt className="text-muted">Duration</dt>
+          <dd className="mt-0.5 font-bold text-plum">
+            {formatDuration(service.duration)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted">Added</dt>
+          <dd className="mt-0.5 font-bold text-plum">
+            {formatDate(service.createdAt)}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button variant="ghost" size="sm" onClick={onEdit} disabled={disabled}>
+          <Pencil aria-hidden="true" className="h-3.5 w-3.5" />
+          Edit
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onToggleStatus}
+          loading={busy === "status"}
+          disabled={disabled}
+        >
+          {service.status === "active" ? "Deactivate" : "Activate"}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onDelete}
+          loading={busy === "delete"}
+          disabled={disabled}
+          className="text-[#B24A4A] hover:bg-[#FCEDED]"
+        >
+          <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
+          Delete
+        </Button>
+      </div>
+    </article>
   );
 }
