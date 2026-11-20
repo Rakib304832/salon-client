@@ -1,36 +1,148 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<!--
+  SALONBOOK CLIENT README — FOUNDATION SKELETON
 
-## Getting Started
+  This README is intentionally a skeleton in Part 1. Later commits will fill in
+  the complete feature list, installation steps, deployment links, and API
+  assumptions. The HTML comments explain what belongs in each section so the
+  final submission stays consistent with the assignment brief.
+-->
 
-First, run the development server:
+# SalonBook — Client
+
+<!--
+  PROJECT NAME AND DESCRIPTION
+  ----------------------------
+  Keep the name exactly "SalonBook". Describe the client as the Next.js UI for
+  a salon appointment booking platform: customers browse services and request
+  appointments; admins manage services, appointments, users, and transactions.
+
+  IMPORTANT ARCHITECTURE NOTE:
+  This repository is CLIENT ONLY. Authentication, MongoDB, Stripe Checkout,
+  Stripe webhooks, and ImgBB uploads all live in the separate Express server.
+  There is no Express, MongoDB, or webhook code here.
+-->
+
+SalonBook is a role-based salon appointment booking platform. This repository
+contains the client-side application: the public service browser, authentication
+screens, customer dashboard, and admin dashboard. It talks to a separate REST
+API using `NEXT_PUBLIC_API_URL`.
+
+## Important features
+
+<!--
+  FEATURE LIST
+  ------------
+  Fill this in as features land. Expected final bullets:
+  - Public home, service browsing, search/filter/sort, service details
+  - Better Auth sign-in, sign-up, Google login, session persistence, logout
+  - Customer booking, appointments, cancellation, Pay Now, profile
+  - Admin service CRUD, appointments, users, transactions, profile, stats
+  - Toasts, dialogs, badges, skeletons, empty/error states, 403/404/blocked UI
+  - Fully responsive layout with desktop tables and mobile stacked cards
+-->
+
+_To be completed as features are implemented._
+
+## Technology stack
+
+<!--
+  TECH STACK
+  ----------
+  List only tools actually used by this repository:
+  - Next.js 16 (App Router) + React + TypeScript
+  - Tailwind CSS v4 (CSS-first @theme tokens)
+  - better-auth/react for client auth calls to the Express server
+  - sonner for toasts
+  - react-hook-form + zod for form validation
+  - lucide-react for icons
+-->
+
+- Next.js (App Router) with TypeScript
+- Tailwind CSS
+- Better Auth client (`better-auth/react`)
+- Sonner toasts
+- React Hook Form + Zod
+
+## Installation
+
+<!--
+  INSTALLATION
+  ------------
+  Use names only for environment variables. Never paste real URLs, keys, or
+  credentials into this file, even as examples.
+-->
+
+```bash
+npm install
+cp .env.example .env.local
+# Fill .env.local locally, then start the dev server below.
+```
+
+## Run locally
+
+<!--
+  LOCAL RUN
+  ---------
+  The client defaults to port 3000. The Express server must already be running
+  and NEXT_PUBLIC_API_URL must point to its origin for API and auth calls.
+-->
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Required environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+<!--
+  ENVIRONMENT VARIABLE NAMES ONLY
+  -------------------------------
+  This section must never contain values. .env.example is the tracked checklist;
+  .env.local is ignored by Git.
 
-## Learn More
+  NEXT_PUBLIC_API_URL       -> browser-visible origin of the Express API
+  BETTER_AUTH_URL           -> public Better Auth URL used by the server/deploy
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID -> optional public Google OAuth client ID
 
-To learn more about Next.js, take a look at the following resources:
+  Secret names such as STRIPE_SECRET_KEY, IMGBB_API_KEY, GOOGLE_CLIENT_SECRET,
+  and BETTER_AUTH_SECRET must NEVER appear in client code or client env files.
+-->
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `NEXT_PUBLIC_API_URL`
+- `BETTER_AUTH_URL`
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Live site
 
-## Deploy on Vercel
+<!-- Add the deployed client URL after deployment. -->
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+_TBD after deployment._
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Repositories
+
+<!--
+  SUBMISSION LINKS
+  ----------------
+  Client repo is known. Server repo and live site should be filled in after the
+  server is deployed. Admin email/password are submitted separately, never here.
+-->
+
+- Client: https://github.com/Rakib304832/salon-client.git
+- Server: _TBD_
+- Live site: _TBD_
+
+## Assumptions about the server API
+
+<!--
+  API ASSUMPTIONS
+  ---------------
+  Final section will document contract details that differ from the design:
+  - app responses use { success, data, message, errors, code }
+  - auth uses Better Auth routes on the Express server
+  - payment success polling uses GET /api/payments/session/:sessionId
+  - server redirects to /booking/*; client provides aliases to /payment/*
+  - sign-up image uses URL-first because /api/uploads requires a session
+-->
+
+_To be finalized after the API layer is implemented._

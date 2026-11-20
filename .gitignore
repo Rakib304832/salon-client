@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# The tracked example is safe because it contains NAMES ONLY and empty values.
+# Real .env / .env.local files stay ignored by the rule above.
+!.env.example
 
 # vercel
 .vercel

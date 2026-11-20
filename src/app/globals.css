@@ -1,26 +1,124 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+ * GLOBAL DESIGN TOKENS
+ * ---------------------------------------------------------------------------
+ * SalonBook uses Tailwind CSS v4. In v4, theme values are declared in CSS with
+ * @theme instead of relying on a JavaScript tailwind.config.ts file.
+ *
+ * We still write plain CSS variables in :root first. That gives us one source
+ * of truth: raw hex values are defined once, then @theme inline exposes them to
+ * Tailwind as utility classes such as bg-ivory, text-plum, or border-line.
+ *
+ * Naming detail:
+ * - :root uses names like --ivory and --card-radius.
+ * - @theme inline exposes them as --color-ivory and --radius-card.
+ *   The different names avoid a self-referencing CSS variable.
+ * --------------------------------------------------------------------------- */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand surfaces */
+  --ivory: #fbf7f2; /* page background */
+  --white: #ffffff; /* cards and inputs */
+  --plum: #4a2c3f; /* primary colour, headings, sidebar */
+  --plum-dark: #2e1a28; /* footer, hero gradient start */
+  --rose-gold: #c9977e; /* accent, price, main CTA */
+  --blush: #f3ddd5; /* soft accent, chips */
+  --blush-light: #faede8; /* table headers, light panels */
+
+  /* Typography and lines */
+  --text: #2b2326; /* body text */
+  --muted: #8a7b7f; /* secondary text */
+  --line: #eadfd8; /* borders */
+
+  /* Shape tokens from the design system */
+  --card-radius: 22px;
+  --input-radius: 14px;
+
+  /* Status badge colours — the same scheme is used in every table and dialog */
+  --status-pending-bg: #fbebcf;
+  --status-pending-text: #a8741f;
+
+  --status-confirmed-bg: #e4eee6;
+  --status-confirmed-text: #4f7557;
+
+  --status-blocked-bg: #f6dcdc;
+  --status-blocked-text: #b24a4a;
+
+  --status-paid-bg: #e9dde5;
+  --status-paid-text: #4a2c3f;
+
+  --status-unpaid-bg: #efeae7;
+  --status-unpaid-text: #8a7b7f;
 }
 
+/*
+ * @theme inline tells Tailwind: "when a utility asks for --color-ivory, use the
+ * current value of --ivory". `inline` keeps the variable reference live, which
+ * is useful because next/font injects its font variables at runtime on <html>.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ivory: var(--ivory);
+  --color-white: var(--white);
+  --color-plum: var(--plum);
+  --color-plum-dark: var(--plum-dark);
+  --color-rose-gold: var(--rose-gold);
+  --color-blush: var(--blush);
+  --color-blush-light: var(--blush-light);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-pending-text: var(--status-pending-text);
+  --color-status-confirmed-bg: var(--status-confirmed-bg);
+  --color-status-confirmed-text: var(--status-confirmed-text);
+  --color-status-blocked-bg: var(--status-blocked-bg);
+  --color-status-blocked-text: var(--status-blocked-text);
+  --color-status-paid-bg: var(--status-paid-bg);
+  --color-status-paid-text: var(--status-paid-text);
+  --color-status-unpaid-bg: var(--status-unpaid-bg);
+  --color-status-unpaid-text: var(--status-unpaid-text);
+
+  --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-playfair);
+
+  --radius-card: var(--card-radius);
+  --radius-input: var(--input-radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ---------------------------------------------------------------------------
+ * BASE ELEMENT STYLES
+ * ---------------------------------------------------------------------------
+ * These are defaults, not component styles. Reusable components added in the
+ * next commit (Button, Input, Badge, etc.) will build on top of these tokens.
+ * --------------------------------------------------------------------------- */
+@layer base {
+  html {
+    min-width: 320px;
+    background-color: var(--ivory);
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    min-height: 100vh;
+    background-color: var(--ivory);
+    color: var(--text);
+    font-family: var(--font-dm-sans), Arial, Helvetica, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-playfair), Georgia, serif;
+    font-weight: 600;
+    color: var(--plum);
+  }
+
+  ::selection {
+    background-color: var(--blush);
+    color: var(--plum-dark);
+  }
 }
