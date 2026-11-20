@@ -3,42 +3,20 @@ import Link from "next/link";
 import { ArrowRight, Clock, Sparkles } from "lucide-react";
 import { formatCurrency, formatDuration } from "@/lib/utils";
 import type { Service } from "@/types";
+import { canRenderWithNextImage } from "./service-image";
 
 /**
  * Reusable service card.
  *
- * Used by the Home featured grid and later by /services and admin previews.
- * Keeping all image/price/duration rules here means those pages cannot drift
- * apart visually.
+ * Used by the Home featured grid, the /services results grid and admin
+ * previews. Keeping all image/price/duration rules here means those pages
+ * cannot drift apart visually.
  *
- * Image safety:
- * - next.config.ts only allows ImgBB hosts through the image optimiser.
- * - A service image can still be empty or point at an unexpected host if data
- *   is edited directly. canRenderWithNextImage() filters those cases and shows
- *   a branded fallback instead of letting next/image throw at runtime.
+ * The image host check is shared with the service detail page through
+ * ./service-image so a security fix only ever has to be made in one place.
  */
 export interface ServiceCardProps {
   service: Service;
-}
-
-function canRenderWithNextImage(src: string): boolean {
-  if (!src) return false;
-
-  try {
-    const base = "https://salonbook.local";
-    const url = new URL(src, base);
-
-    // Local paths are served by Next.js itself.
-    if (src.startsWith("/")) return url.protocol === "https:";
-
-    // Remote images must match next.config.ts remotePatterns.
-    return (
-      url.protocol === "https:" &&
-      (url.hostname === "i.ibb.co" || url.hostname === "ibb.co")
-    );
-  } catch {
-    return false;
-  }
 }
 
 export function ServiceCard({ service }: ServiceCardProps) {

@@ -44,16 +44,45 @@ export const signUpSchema = z.object({
 export type SignUpInput = z.infer<typeof signUpSchema>;
 
 /**
+ * "YYYY-MM-DD" for the first date the server accepts (tomorrow in UTC).
+ *
+ * Date inputs need an explicit `min` attribute. Computing it from UTC matches
+ * the server's booking rule, so a user in any time zone sees the same earliest
+ * selectable day the API will accept.
+ */
+export function earliestBookingDate(): string {
+  const now = new Date();
+  const tomorrow = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1),
+  );
+
+  return tomorrow.toISOString().slice(0, 10);
+}
+
+/**
  * Converts "YYYY-MM-DD" to a UTC day number and rejects today or earlier.
- * The server also enforces "date must be after today (UTC)", so matching that
- * rule here avoids avoidable 400 responses.
+ *
+ * The first check mirrors the server's parseAppointmentDate(): JavaScript's
+ * Date.UTC() silently rolls invalid dates such as 2026-02-30 into March.
+ * Comparing the rebuilt UTC components rejects those impossible dates before
+ * they ever reach the API.
  */
 function isFutureUtcDate(value: string): boolean {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return false;
 
-  const [, year, month, day] = match;
-  const selected = Date.UTC(Number(year), Number(month) - 1, Number(day));
+  const [, yearText, monthText, dayText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const selected = new Date(Date.UTC(year, month - 1, day));
+
+  const isRealCalendarDate =
+    selected.getUTCFullYear() === year &&
+    selected.getUTCMonth() === month - 1 &&
+    selected.getUTCDate() === day;
+  if (!isRealCalendarDate) return false;
+
   const now = new Date();
   const todayUtc = Date.UTC(
     now.getUTCFullYear(),
@@ -61,7 +90,7 @@ function isFutureUtcDate(value: string): boolean {
     now.getUTCDate(),
   );
 
-  return selected > todayUtc;
+  return selected.getTime() > todayUtc;
 }
 
 export const bookingSchema = z.object({

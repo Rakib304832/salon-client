@@ -9,5 +9,7 @@
 export { ServiceBrowser } from "./ServiceBrowser";
 export { ServiceCard } from "./ServiceCard";
 export type { ServiceCardProps } from "./ServiceCard";
+export { ServiceDetail } from "./ServiceDetail";
+export type { ServiceDetailProps } from "./ServiceDetail";
 export { ServiceFilters } from "./ServiceFilters";
 export type { ServiceFiltersProps } from "./ServiceFilters";
