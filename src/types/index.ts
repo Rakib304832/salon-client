@@ -128,35 +128,51 @@ export interface CustomerStats {
 }
 
 /**
- * The admin stats count keys are kept flexible because the server handoff
- * describes the values but not the exact key names inside `counts`. Pages
- * should read them through the mapping helper added with the admin overview.
+ * Exact shape of GET /api/admin/stats.
+ *
+ * These keys mirror server/src/types/models.ts. Keeping them strict means a
+ * contract change becomes a TypeScript error instead of silently rendering
+ * "undefined" on the dashboard.
  */
 export interface AdminCounts {
-  customers?: number;
-  totalCustomers?: number;
-  activeServices?: number;
-  totalActiveServices?: number;
-  appointments?: number;
-  totalAppointments?: number;
-  pending?: number;
-  pendingAppointments?: number;
-  confirmed?: number;
-  confirmedAppointments?: number;
-  successfulPayments?: number;
-  paidTransactions?: number;
-  [key: string]: number | undefined;
+  users: number;
+  customers: number;
+  services: number;
+  activeServices: number;
+  appointments: number;
+  pendingAppointments: number;
+  confirmedAppointments: number;
+  cancelledAppointments: number;
+  paidAppointments: number;
+  paidTransactions: number;
+  failedTransactions: number;
+}
+
+export interface AdminRevenueBreakdown {
+  /** Lower-case currency code reported by Stripe, e.g. "usd". */
+  currency: string;
+  /** Smallest currency unit; divide by 100 before display. */
+  amount: number;
+}
+
+export interface AdminRevenue {
+  /** Combined amount in the smallest currency unit. */
+  total: number;
+  byCurrency: AdminRevenueBreakdown[];
+}
+
+export interface PopularServiceStat {
+  serviceId: string;
+  serviceName: string;
+  /** Non-cancelled appointments, not the client-side `count` guess. */
+  bookings: number;
 }
 
 export interface AdminStats {
   counts: AdminCounts;
-  revenue: number;
+  revenue: AdminRevenue;
   recentAppointments: Appointment[];
-  popularServices: Array<{
-    serviceId?: string;
-    serviceName: string;
-    count: number;
-  }>;
+  popularServices: PopularServiceStat[];
 }
 
 /* -------------------------------------------------------------------------- */

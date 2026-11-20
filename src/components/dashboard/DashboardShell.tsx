@@ -5,14 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDays,
-  CreditCard,
   LayoutDashboard,
   LogOut,
-  Settings,
   Sparkles,
   UserRound,
-  Users,
-  Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/components/providers";
@@ -54,11 +50,6 @@ const DASHBOARD_NAV: Record<DashboardArea, DashboardNavItem[]> = {
   ],
   admin: [
     { href: ROUTES.adminDashboard, label: "Overview", icon: LayoutDashboard },
-    { href: ROUTES.adminAppointments, label: "Appointments", icon: CalendarDays },
-    { href: ROUTES.adminServices, label: "Services", icon: Wrench },
-    { href: ROUTES.adminUsers, label: "Users", icon: Users },
-    { href: ROUTES.adminTransactions, label: "Transactions", icon: CreditCard },
-    { href: ROUTES.adminProfile, label: "My profile", icon: Settings },
   ],
 };
 
