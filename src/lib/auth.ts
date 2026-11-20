@@ -14,8 +14,12 @@ import type { SignInInput, SignUpInput } from "./validators";
  * in one place.
  */
 
-/** Better Auth's session user does not know our extra fields at type level. */
-function normaliseUser(value: unknown): User | null {
+/**
+ * Better Auth's session user does not know our extra fields at type level.
+ * Exported so the global AuthProvider can instantly derive role/isBlocked from
+ * the session while its fresh /api/users/me request is still in flight.
+ */
+export function toUserFromSession(value: unknown): User | null {
   if (!value || typeof value !== "object") return null;
   const raw = value as Record<string, unknown>;
   if (typeof raw.id !== "string" || typeof raw.email !== "string") return null;
@@ -50,26 +54,46 @@ export async function getClientSession(): Promise<ClientSession | null> {
 /** Reads role/isBlocked from the session without an extra app-API call. */
 export async function getSessionUser(): Promise<User | null> {
   const session = await getClientSession();
-  return session ? normaliseUser(session.user) : null;
+  return session ? toUserFromSession(session.user) : null;
 }
 
 /**
- * Fresh profile used by guards and the navbar.
+ * Turns an already-loaded Better Auth session into the freshest app user.
  *
- * We prefer /api/users/me because block status can change while a session is
- * still valid. If that request fails for a non-session reason, the session user
- * is still a safe fallback.
+ * Why not trust the session alone?
+ * - Role and isBlocked are server-assigned and can change while a cookie is
+ *   still valid. /api/users/me reads the live database record.
+ * - A blocked account may receive 403 on that endpoint. We still keep the user
+ *   (so the UI can show the Account Blocked screen) but force isBlocked = true.
+ * - A 401 means the cookie is stale; the visitor is treated as signed out.
+ * - Any other failure falls back to session data, which is better than logging
+ *   someone out because of a temporary network problem.
  */
-export async function getCurrentUser(): Promise<User | null> {
-  const sessionUser = await getSessionUser();
+export async function getFreshUser(session: ClientSession): Promise<User | null> {
+  const sessionUser = toUserFromSession(session.user);
   if (!sessionUser) return null;
 
   try {
     return await usersApi.me();
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return null;
+    if (error instanceof ApiError && error.status === 403) {
+      return { ...sessionUser, isBlocked: true };
+    }
     return sessionUser;
   }
+}
+
+/**
+ * Fresh profile used by guards and the navbar.
+ *
+ * This is a convenience wrapper for code that only needs the final user. The
+ * AuthProvider calls getClientSession() and getFreshUser() separately so it can
+ * reuse the same session object without a second Better Auth round trip.
+ */
+export async function getCurrentUser(): Promise<User | null> {
+  const session = await getClientSession();
+  return session ? getFreshUser(session) : null;
 }
 
 /**

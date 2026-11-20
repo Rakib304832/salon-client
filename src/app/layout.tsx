@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { DM_Sans, Playfair_Display } from "next/font/google";
 import { Toaster } from "sonner";
+import { AuthProvider } from "@/components/providers";
 import "./globals.css";
 
 /**
@@ -70,13 +71,21 @@ export default function RootLayout({
       className={`${dmSans.variable} ${playfairDisplay.variable}`}
     >
       <body className="min-h-screen bg-ivory text-text antialiased">
-        {/* The active route tree is injected here by Next.js. */}
-        {children}
+        {/*
+          AuthProvider wraps the whole route tree so the navbar, page guards,
+          dashboards and forms all share one session state. It is a Client
+          Component, but Server Components can still be passed as children.
+
+          The global Toaster stays OUTSIDE the provider: toast feedback should
+          still work even while the provider is showing its own loading state.
+        */}
+        <AuthProvider>{children}</AuthProvider>
 
         {/*
-          Sonner's Toaster must be mounted once, globally. Any component can
-          call toast.success(...) / toast.error(...) later without importing a
-          provider. This replaces browser alert() for all user feedback.
+          Sonner's Toaster is mounted once, globally. Components use the small
+          helpers in lib/toast.ts (toastSuccess, toastApiError, ...) instead of
+          calling sonner directly, which keeps messages consistent. This
+          replaces browser alert() for all user feedback.
         */}
         <Toaster position="top-right" richColors closeButton />
       </body>

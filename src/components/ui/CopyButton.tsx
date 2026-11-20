@@ -1,8 +1,8 @@
 "use client";
 
 import { Copy } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "./Button";
+import { toastError, toastSuccess } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 
 export interface CopyButtonProps {
@@ -16,7 +16,8 @@ export interface CopyButtonProps {
  * Used next to shortened Stripe session IDs on the transactions page.
  *
  * The button copies the FULL session ID while the table shows only the first
- * eight characters via shortenSessionId(). Feedback uses sonner, never alert().
+ * eight characters via shortenSessionId(). Feedback goes through lib/toast,
+ * never browser alert().
  */
 export function CopyButton({
   value,
@@ -26,9 +27,9 @@ export function CopyButton({
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(value);
-      toast.success("Session ID copied");
+      toastSuccess("Session ID copied");
     } catch {
-      toast.error("Could not copy. Please try again.");
+      toastError("Could not copy. Please try again.");
     }
   }
 

@@ -77,6 +77,8 @@ export const ROUTES = {
   adminProfile: "/dashboard/admin/profile",
   paymentSuccess: "/payment/success",
   paymentCancel: "/payment/cancel",
+  accessDenied: "/access-denied",
+  accountBlocked: "/account-blocked",
 } as const;
 
 export const APPOINTMENT_STATUS_LABELS = {
