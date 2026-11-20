@@ -1,91 +1,59 @@
-<!--
-  SALONBOOK CLIENT README — FOUNDATION SKELETON
-
-  This README is intentionally a skeleton in Part 1. Later commits will fill in
-  the complete feature list, installation steps, deployment links, and API
-  assumptions. The HTML comments explain what belongs in each section so the
-  final submission stays consistent with the assignment brief.
--->
-
 # SalonBook — Client
 
-<!--
-  PROJECT NAME AND DESCRIPTION
-  ----------------------------
-  Keep the name exactly "SalonBook". Describe the client as the Next.js UI for
-  a salon appointment booking platform: customers browse services and request
-  appointments; admins manage services, appointments, users, and transactions.
-
-  IMPORTANT ARCHITECTURE NOTE:
-  This repository is CLIENT ONLY. Authentication, MongoDB, Stripe Checkout,
-  Stripe webhooks, and ImgBB uploads all live in the separate Express server.
-  There is no Express, MongoDB, or webhook code here.
--->
-
 SalonBook is a role-based salon appointment booking platform. This repository
-contains the client-side application: the public service browser, authentication
-screens, customer dashboard, and admin dashboard. It talks to a separate REST
-API using `NEXT_PUBLIC_API_URL`.
+contains the **client-side** Next.js application: the public service catalogue,
+authentication screens, customer dashboard, booking flow, payment return pages,
+and the shared UI system used across the app.
+
+This project is intentionally **client-only**. Authentication, MongoDB, Stripe
+Checkout, Stripe webhooks, and ImgBB uploads all live in a separate Express REST
+API. There is no Express server, database model, webhook handler, or secret in
+this repository. Browser code talks to the API through `NEXT_PUBLIC_API_URL`.
 
 ## Important features
 
-<!--
-  FEATURE LIST
-  ------------
-  Fill this in as features land. Expected final bullets:
-  - Public home, service browsing, search/filter/sort, service details
-  - Better Auth sign-in, sign-up, Google login, session persistence, logout
-  - Customer booking, appointments, cancellation, Pay Now, profile
-  - Admin service CRUD, appointments, users, transactions, profile, stats
-  - Toasts, dialogs, badges, skeletons, empty/error states, 403/404/blocked UI
-  - Fully responsive layout with desktop tables and mobile stacked cards
--->
-
-_To be completed as features are implemented._
+- Public home page with brand story, category tiles, and featured services.
+- Service browsing with debounced search, category filtering, price sorting,
+  URL-synced filter state, and skeleton/empty/error/retry states.
+- Service detail pages with pricing, duration, image fallback, and an
+  auth-aware appointment request form.
+- Better Auth sign-in and sign-up screens through the Express server, including
+  Google sign-in, session persistence, logout, and guarded routes.
+- Blocked-account and access-denied screens that reflect live server state.
+- Customer dashboard with server-calculated appointment statistics and recent
+  requests.
+- Customer appointment history with status filters, details dialog, pending
+  cancellation, and Stripe **Pay Now** for confirmed appointments.
+- Profile editing for name, phone, and image, with authenticated ImgBB uploads
+  through the Express API.
+- Payment success polling against the webhook-backed session endpoint and a
+  cancel page that safely offers another checkout attempt.
+- Shared button, input, select, textarea, badge, modal, confirmation dialog,
+  skeleton, spinner, toast, empty-state, and error-state components.
+- Fully responsive salon-themed layout: desktop sidebar/navigation and mobile
+  stacked cards and scrollable navigation.
 
 ## Technology stack
 
-<!--
-  TECH STACK
-  ----------
-  List only tools actually used by this repository:
-  - Next.js 16 (App Router) + React + TypeScript
-  - Tailwind CSS v4 (CSS-first @theme tokens)
-  - better-auth/react for client auth calls to the Express server
-  - sonner for toasts
-  - react-hook-form + zod for form validation
-  - lucide-react for icons
--->
-
-- Next.js (App Router) with TypeScript
-- Tailwind CSS
-- Better Auth client (`better-auth/react`)
-- Sonner toasts
-- React Hook Form + Zod
+- Next.js 16 (App Router), React 19, and TypeScript
+- Tailwind CSS v4 with CSS-first `@theme` design tokens
+- `better-auth/react` for client authentication calls to the Express server
+- Sonner for consistent action feedback
+- React Hook Form and Zod for form validation
+- Lucide React for icons
+- A typed `fetch` layer with one error type and credential handling
 
 ## Installation
-
-<!--
-  INSTALLATION
-  ------------
-  Use names only for environment variables. Never paste real URLs, keys, or
-  credentials into this file, even as examples.
--->
 
 ```bash
 npm install
 cp .env.example .env.local
-# Fill .env.local locally, then start the dev server below.
 ```
 
-## Run locally
+Fill `.env.local` locally before starting the app. The tracked `.env.example`
+contains variable **names only** and is safe to commit.
 
-<!--
-  LOCAL RUN
-  ---------
-  The client defaults to port 3000. The Express server must already be running
-  and NEXT_PUBLIC_API_URL must point to its origin for API and auth calls.
--->
+## Run locally
 
 ```bash
 npm run dev
@@ -93,56 +61,61 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+The Express API must already be running, and `NEXT_PUBLIC_API_URL` must point to
+its origin (scheme, host, and optional port — without a trailing `/api`). The
+client appends routes such as `/api/services` and `/api/auth` itself.
+
+Other useful checks:
+
+```bash
+npm run typecheck
+npm run lint
+npm run build
+```
+
 ## Required environment variables
-
-<!--
-  ENVIRONMENT VARIABLE NAMES ONLY
-  -------------------------------
-  This section must never contain values. .env.example is the tracked checklist;
-  .env.local is ignored by Git.
-
-  NEXT_PUBLIC_API_URL       -> browser-visible origin of the Express API
-  BETTER_AUTH_URL           -> public Better Auth URL used by the server/deploy
-  NEXT_PUBLIC_GOOGLE_CLIENT_ID -> optional public Google OAuth client ID
-
-  Secret names such as STRIPE_SECRET_KEY, IMGBB_API_KEY, GOOGLE_CLIENT_SECRET,
-  and BETTER_AUTH_SECRET must NEVER appear in client code or client env files.
--->
 
 - `NEXT_PUBLIC_API_URL`
 - `BETTER_AUTH_URL`
 - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 
+Only these public or deployment-facing names appear in this repository. Secret
+names and values belong exclusively to the server deployment. Never commit
+`.env`, `.env.local`, API keys, or credentials.
+
 ## Live site
 
-<!-- Add the deployed client URL after deployment. -->
-
-_TBD after deployment._
+Pending deployment URL.
 
 ## Repositories
 
-<!--
-  SUBMISSION LINKS
-  ----------------
-  Client repo is known. Server repo and live site should be filled in after the
-  server is deployed. Admin email/password are submitted separately, never here.
--->
-
 - Client: https://github.com/Rakib304832/salon-client.git
-- Server: _TBD_
-- Live site: _TBD_
+- Server: pending repository URL
+- Live site: pending deployment URL
 
 ## Assumptions about the server API
 
-<!--
-  API ASSUMPTIONS
-  ---------------
-  Final section will document contract details that differ from the design:
-  - app responses use { success, data, message, errors, code }
-  - auth uses Better Auth routes on the Express server
-  - payment success polling uses GET /api/payments/session/:sessionId
-  - server redirects to /booking/*; client provides aliases to /payment/*
-  - sign-up image uses URL-first because /api/uploads requires a session
--->
-
-_To be finalized after the API layer is implemented._
+- Application responses use the envelope
+  `{ success, data, message, errors, code }`.
+- Authentication is handled by Better Auth routes on the Express server. The
+  client stores no tokens and sends cookies with `credentials: "include"`.
+- The browser always derives the API origin from `NEXT_PUBLIC_API_URL`; no API
+  origin is hardcoded in client code.
+- Customer appointment statistics come from `GET /api/appointments/stats`;
+  admin statistics come from `GET /api/admin/stats`.
+- Appointment dates must be after today in UTC and use one of the ten fixed
+  hourly slots from 09:00 AM to 06:00 PM. Slots are salon-wide.
+- A customer may cancel only a pending, unpaid appointment and may pay only a
+  confirmed, unpaid appointment. The server enforces both rules again.
+- Checkout returns `{ url, sessionId }`; the browser redirects to Stripe's
+  hosted URL. The client never changes payment status itself.
+- Payment success is verified with `GET /api/payments/session/:sessionId`. The
+  page retries while the verified webhook has not yet landed.
+- Stripe redirects to `/booking/success` and `/booking/cancel`. The client also
+  provides `/payment/success` and `/payment/cancel` aliases so both the server
+  contract and the assignment route names work.
+- Transaction amounts are returned in cents and divided by 100 for display.
+  Service and appointment prices are already in major currency units.
+- Sign-up accepts an image URL as the primary path because `/api/uploads`
+  requires an authenticated session. Profile editing can upload a file after
+  sign-in.
