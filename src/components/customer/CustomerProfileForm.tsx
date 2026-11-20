@@ -57,7 +57,22 @@ function imagePreviewStyle(value: string | undefined): CSSProperties | undefined
   }
 }
 
-export function CustomerProfileForm() {
+/**
+ * Presentation props let the admin area reuse exactly the same save/upload
+ * logic. They are optional so the existing customer page keeps its original
+ * copy without needing to pass anything.
+ */
+export interface CustomerProfileFormProps {
+  title?: string;
+  description?: string;
+  roleLabel?: string;
+}
+
+export function CustomerProfileForm({
+  title = "My profile",
+  description = "Keep your contact details current so the salon can reach you about a confirmed appointment.",
+  roleLabel = "Customer account",
+}: CustomerProfileFormProps) {
   const { user, setUser } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -161,10 +176,9 @@ export function CustomerProfileForm() {
   return (
     <div className="space-y-7">
       <section>
-        <h1 className="text-3xl">My profile</h1>
+        <h1 className="text-3xl">{title}</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-          Keep your contact details current so the salon can reach you about a
-          confirmed appointment.
+          {description}
         </p>
       </section>
 
@@ -182,7 +196,7 @@ export function CustomerProfileForm() {
           <p className="mt-1 text-sm text-muted">{user?.email}</p>
           <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-blush-light px-3 py-1 text-xs font-bold text-plum">
             <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5" />
-            Customer account
+            {roleLabel}
           </p>
 
           <div className="mt-5 space-y-2 border-t border-line pt-5 text-left text-xs">

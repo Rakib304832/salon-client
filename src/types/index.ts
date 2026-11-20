@@ -72,6 +72,8 @@ export interface Transaction {
   customerInfo?: User;
   serviceInfo?: Service;
   appointmentInfo?: Appointment;
+  /** Copied from the related booking by the admin transaction serializer. */
+  appointmentDate?: string;
 }
 
 /* -------------------------------------------------------------------------- */

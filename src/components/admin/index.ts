@@ -6,6 +6,7 @@
  */
 export { AdminAppointments } from "./AdminAppointments";
 export { AdminOverview } from "./AdminOverview";
+export { AdminTransactions } from "./AdminTransactions";
 export { AdminUsers } from "./AdminUsers";
 export { ServiceForm } from "./ServiceForm";
 export type { ServiceFormProps } from "./ServiceForm";

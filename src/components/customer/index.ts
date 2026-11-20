@@ -9,3 +9,4 @@ export type { AppointmentSummaryCardProps } from "./AppointmentSummaryCard";
 export { CustomerAppointments } from "./CustomerAppointments";
 export { CustomerOverview } from "./CustomerOverview";
 export { CustomerProfileForm } from "./CustomerProfileForm";
+export type { CustomerProfileFormProps } from "./CustomerProfileForm";
