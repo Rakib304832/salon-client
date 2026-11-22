@@ -8,6 +8,7 @@ import {
   Clock3,
   CreditCard,
   Sparkles,
+  XCircle,
 } from "lucide-react";
 import { useAuth } from "@/components/providers";
 import {
@@ -26,8 +27,8 @@ import { ROUTES } from "@/lib/constants";
  * CUSTOMER DASHBOARD OVERVIEW
  * ---------------------------
  * This page is a decision screen, not another booking form. It answers four
- * questions quickly: how many requests exist, how many are waiting, how many
- * are confirmed, and which payment state they are in.
+ * questions quickly: how many requests exist, how many are waiting, confirmed,
+ * cancelled, and which payment state they are in.
  *
  * All numbers come from /api/appointments/stats and the preview comes from
  * /api/appointments/mine. Deriving them from a single list in the browser would
@@ -87,8 +88,8 @@ export function CustomerOverview() {
           <Skeleton className="h-8 w-64" />
           <Skeleton className="mt-3 h-4 w-96 max-w-full" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[0, 1, 2, 3].map((item) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {[0, 1, 2, 3, 4].map((item) => (
             <Skeleton key={item} className="h-36 w-full rounded-card" />
           ))}
         </div>
@@ -125,7 +126,7 @@ export function CustomerOverview() {
         </p>
       </section>
 
-      <section aria-label="Appointment summary" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Appointment summary" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatCard
           label="Total requests"
           value={stats?.total ?? 0}
@@ -143,6 +144,12 @@ export function CustomerOverview() {
           value={stats?.confirmed ?? 0}
           hint="Ready for your visit"
           icon={CheckCircle2}
+        />
+        <StatCard
+          label="Cancelled"
+          value={stats?.cancelled ?? 0}
+          hint="Requests that are now closed"
+          icon={XCircle}
         />
         <StatCard
           label="Paid"
