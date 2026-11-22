@@ -10,43 +10,58 @@ Checkout, Stripe webhooks, and ImgBB uploads all live in a separate Express REST
 API. There is no Express server, database model, webhook handler, or secret in
 this repository. Browser code talks to the API through `NEXT_PUBLIC_API_URL`.
 
+## Links
+
+- Live site: **pending deployment URL** — deploy this client and replace this
+  line with the production URL before submission.
+- Client repository: https://github.com/Rakib304832/salon-client.git
+- Server repository: https://github.com/Rakib304832/Salon-server-site.git
+
 ## Important features
 
-- Public home page with brand story, category tiles, and featured services.
+- Public home page with brand story, API-derived category tiles, and six
+  featured active services.
 - Service browsing with debounced search, category filtering, price sorting,
   URL-synced filter state, and skeleton/empty/error/retry states.
-- Service detail pages with pricing, duration, image fallback, and an
-  auth-aware appointment request form.
+- Protected service detail pages: guests are redirected to sign-in with a
+  return URL, blocked accounts see the blocked screen, and details show price,
+  duration, category, image fallback, and an auth-aware request form.
 - Better Auth sign-in and sign-up screens through the Express server, including
   Google sign-in, session persistence, logout, and guarded routes.
+- Public header profile dropdown with the signed-in user's name, Dashboard,
+  profile link, and Logout.
 - Blocked-account and access-denied screens that reflect live server state.
-- Customer dashboard with server-calculated appointment statistics and recent
-  requests.
-- Customer appointment history with status filters, details dialog, pending
-  cancellation, and Stripe **Pay Now** for confirmed appointments.
+- Customer dashboard with server-calculated total, pending, confirmed,
+  cancelled, and paid appointment statistics plus recent requests.
+- Customer appointment history with status and payment filters, service image
+  and category, details dialog, pending cancellation, and Stripe **Pay Now** for
+  confirmed appointments.
 - Profile editing for name, phone, and image, with authenticated ImgBB uploads
   through the Express API.
 - Payment success polling against the webhook-backed session endpoint and a
   cancel page that safely offers another checkout attempt.
-- Admin dashboard guarded by role, with server statistics, revenue overview, and
-  popular-service reporting.
-- Admin service management with create/edit forms, authenticated image upload,
-  activate/deactivate controls, and delete protection tied to live bookings.
+- Admin dashboard guarded by role, with server statistics, revenue overview,
+  popular-service reporting, and explicit total/confirmed appointment counts.
+- Admin service management with create/edit forms, upload-only service images,
+  Active/Inactive status control, activate/deactivate controls, and delete
+  protection tied to live bookings.
 - Admin appointment management with server-side filters, details dialog, and
   confirm/cancel actions that follow the server state machine.
 - Admin user management with search and filters, plus customer-only
   block/unblock actions. Roles remain server-assigned.
-- Read-only Stripe transaction history with cent-to-major-unit conversion and
-  no client-side refund or payment mutation.
+- Read-only Stripe transaction history with explicit currency labels,
+  cent-to-major-unit conversion, and no client-side refund or payment mutation.
 - Admin profile editing that reuses the customer form while keeping email, role,
   and blocked state server-owned.
+- Branded 404 and root error pages for invalid routes and unhandled UI errors.
+- Footer with salon email, telephone, address, opening hours, and social links.
 - Shared button, input, select, textarea, badge, modal, confirmation dialog,
   skeleton, spinner, toast, empty-state, and error-state components.
 - Fully responsive salon-themed layout: desktop tables/sidebar and mobile
   stacked cards with scrollable navigation.
 - Keyboard accessibility features: skip link, focus-visible rings, labelled
-  tables, a focus-trapping modal, focus return on close, and Escape-to-close
-  overlays.
+  tables, a focus-trapping modal, focus return on close, Escape-to-close
+  overlays, and a keyboard-operable profile menu.
 
 ## Technology stack
 
@@ -97,7 +112,7 @@ This repository is a client-only Next.js application and can be deployed to any
 host that supports Next.js 16, including Vercel.
 
 1. Import the **client** repository and keep the Express server deployed
-   separately.
+   separately from the server repository above.
 2. Set `NEXT_PUBLIC_API_URL`, `BETTER_AUTH_URL`, and
    `NEXT_PUBLIC_GOOGLE_CLIENT_ID` in the host's environment settings. Values are
    intentionally not stored in this repository.
@@ -108,38 +123,46 @@ host that supports Next.js 16, including Vercel.
 5. Configure the Express API to allow the deployed client origin with
    credentials, and configure Better Auth/trusted redirects on the server to use
    the same client origin.
-6. After deployment, run the smoke tests in
-   [docs/VERIFICATION.md](docs/VERIFICATION.md).
+6. Configure the server's Stripe success/cancel URLs to point at the deployed
+   `/booking/success` and `/booking/cancel` routes (or the `/payment/*` aliases).
+7. After deployment, run the smoke tests in
+   [docs/VERIFICATION.md](docs/VERIFICATION.md) and replace the pending live URL
+   in the Links section above.
 
 The client never contains database URLs, Stripe secret keys, ImgBB keys, or
 Better Auth secrets. Those belong only in the server deployment.
 
 ## Required environment variables
 
+### Client / deployment-facing names used in this repository
+
 - `NEXT_PUBLIC_API_URL`
 - `BETTER_AUTH_URL`
 - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 
-Only these public or deployment-facing names appear in this repository. Secret
-names and values belong exclusively to the server deployment. Never commit
-`.env`, `.env.local`, API keys, or credentials.
+### Server-only names — documented here by name only, never used by the client
+
+- `MONGODB_URI`
+- `BETTER_AUTH_SECRET`
+- `BETTER_AUTH_URL`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `IMGBB_API_KEY`
+- `CLIENT_URL`
+- `PORT`
+
+Never commit `.env`, `.env.local`, API keys, or credentials. Only the variable
+**names** are documented here; all values stay in each deployment's environment
+settings.
 
 ## Verification
 
 Automated checks are `npm run typecheck`, `npm run lint`, and `npm run build`.
-A successful build produces 22 routes, including all customer and admin
-dashboards. For local or deployed manual smoke tests, follow
+A successful build includes all public, auth, customer, admin, booking and
+payment routes. For local or deployed manual smoke tests, follow
 [docs/VERIFICATION.md](docs/VERIFICATION.md).
-
-## Live site
-
-Pending deployment URL.
-
-## Repositories
-
-- Client: https://github.com/Rakib304832/salon-client.git
-- Server: pending repository URL
-- Live site: pending deployment URL
 
 ## Assumptions about the server API
 
@@ -164,6 +187,5 @@ Pending deployment URL.
   contract and the assignment route names work.
 - Transaction amounts are returned in cents and divided by 100 for display.
   Service and appointment prices are already in major currency units.
-- Sign-up accepts an image URL as the primary path because `/api/uploads`
-  requires an authenticated session. Profile editing can upload a file after
-  sign-in.
+- Sign-up accepts name, email, password, and an optional image URL. Phone is
+  updated later in the profile because `/api/uploads` requires a session.
