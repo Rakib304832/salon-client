@@ -94,6 +94,30 @@ export const ROUTES = {
   accountBlocked: "/account-blocked",
 } as const;
 
+/**
+ * Public salon details.
+ *
+ * These are display constants, not secrets. Replace the sample values with the
+ * salon's real contact details before production launch. Keeping them here means
+ * the footer, contact links and any future "Contact" section stay in sync.
+ */
+export const SALON_CONTACT = {
+  email: "hello@salonbook.example",
+  phoneDisplay: "+1 (555) 010-2030",
+  phoneHref: "+15550102030",
+  addressLines: ["248 Bloom Street", "Suite 200", "New York, NY 10012"],
+  hours: [
+    { days: "Monday – Friday", time: "9:00 AM – 8:00 PM" },
+    { days: "Saturday", time: "10:00 AM – 6:00 PM" },
+    { days: "Sunday", time: "Closed" },
+  ],
+  socialLinks: [
+    { label: "Facebook", href: "https://www.facebook.com/" },
+    { label: "Instagram", href: "https://www.instagram.com/" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/" },
+  ],
+} as const;
+
 export const APPOINTMENT_STATUS_LABELS = {
   pending: "Pending",
   confirmed: "Confirmed",
