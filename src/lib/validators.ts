@@ -147,9 +147,10 @@ export const serviceFormSchema = z.object({
     .int("Duration must be a whole number of minutes.")
     .positive("Duration must be greater than 0.")
     .max(600, "Duration cannot exceed 600 minutes."),
-  // Create mode requires a file; edit mode keeps this existing URL until a new
-  // file is chosen. The browser never sends an ImgBB key with this value.
-  image: z.string().url("Upload a service image."),
+  // Empty is allowed at validation time so a newly chosen file can be uploaded
+  // inside onSubmit. ServiceForm then requires either an existing URL (edit
+  // mode) or a selected file. The browser never sends an ImgBB key here.
+  image: z.union([z.literal(""), z.string().url("Upload a valid service image.")]),
   status: z.enum(["active", "inactive"], "Choose a service status."),
 });
 /** Raw field values are strings from number inputs; parsed values are numbers. */
