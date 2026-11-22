@@ -13,7 +13,7 @@ import type { Service } from "@/types";
  * -----------------
  * The only data-driven section on Home. It calls the public /api/services
  * endpoint, which already returns active-only services, and shows the first
- * three as a tasteful preview.
+ * six as the brief's featured-service section.
  *
  * Loading states are explicit:
  * - skeleton grid while the request is in flight
@@ -29,7 +29,7 @@ import type { Service } from "@/types";
  * true from useState, and Retry sets it from an event handler, so there is no
  * synchronous setState in the effect body.
  */
-const FEATURED_LIMIT = 3;
+const FEATURED_LIMIT = 6;
 
 export function FeaturedServices() {
   const [services, setServices] = useState<Service[]>([]);
