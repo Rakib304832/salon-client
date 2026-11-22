@@ -381,8 +381,8 @@ export function ServiceManager() {
         title={editingService ? "Edit service" : "Create service"}
         description={
           editingService
-            ? "Update the catalogue details. Status is changed from the list."
-            : "New services become active immediately."
+            ? "Update the catalogue details, image and Active/Inactive status."
+            : "Upload an image and choose Active or Inactive. Active services appear in public browsing."
         }
         size="lg"
       >

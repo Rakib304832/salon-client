@@ -26,13 +26,13 @@ import type { Service } from "@/types";
  * supplies an existing service for edits and a `key` for new forms, so this
  * component never has to reset stale state when the dialog reopens.
  *
- * Images follow the server's two supported paths:
- * 1. paste an HTTPS URL (useful when reusing an existing ImgBB link)
- * 2. choose a JPEG/PNG/WebP file, upload it to /api/uploads, then submit the
- *    returned URL with the service payload
+ * Images are upload-based: choosing a JPEG/PNG/WebP file uploads it to the
+ * authenticated /api/uploads endpoint when the form is saved, and the returned
+ * ImgBB URL becomes the service image. Edit mode may keep the existing image if
+ * no new file is selected. The private ImgBB key stays on Express.
  *
- * The private ImgBB key stays on Express. This browser only ever sees the
- * public URL returned by the authenticated upload endpoint.
+ * Status is editable here for admin convenience, but it is applied through
+ * PATCH /:id/status because the create/update content schema ignores it.
  */
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set([
@@ -66,15 +66,18 @@ export function ServiceForm({
       price: service?.price ?? 0,
       duration: service?.duration ?? 0,
       image: service?.image ?? "",
+      status: service?.status ?? "active",
     },
   });
 
   const imageValue = useWatch({ control: form.control, name: "image" });
   const imageIsSafe = canRenderWithNextImage(imageValue);
+  const imageError = uploadError ?? form.formState.errors.image?.message;
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     setUploadError(null);
+    form.clearErrors("image");
 
     if (!file) {
       setSelectedFile(null);
@@ -101,9 +104,14 @@ export function ServiceForm({
   async function onSubmit(values: ServiceFormInput) {
     setUploadError(null);
 
-    // Start with the pasted URL. A selected file uploads first and wins, so the
-    // admin never has to copy the returned ImgBB URL back into the form.
+    // The hidden image field holds either the existing URL (edit mode) or the
+    // URL returned by /api/uploads. Create mode has no fallback URL.
     let imageUrl = values.image.trim();
+
+    if (!imageUrl && !selectedFile) {
+      form.setError("image", { message: "Upload a service image." });
+      return;
+    }
 
     if (selectedFile) {
       try {
@@ -120,27 +128,24 @@ export function ServiceForm({
       }
     }
 
-    // Status is intentionally excluded: create defaults to active on the server
-    // and status changes go through servicesApi.setStatus from the list screen.
+    // Status is form-only state: the content endpoint ignores it. It is applied
+    // separately after the content save so create/update payloads stay strict.
+    const { status, ...content } = values;
     const payload = {
-      serviceName: values.serviceName.trim(),
-      category: values.category,
-      description: values.description.trim(),
-      price: values.price,
-      duration: values.duration,
+      serviceName: content.serviceName.trim(),
+      category: content.category,
+      description: content.description.trim(),
+      price: content.price,
+      duration: content.duration,
       image: imageUrl,
     };
 
+    let saved: Service;
+
     try {
-      const saved = service
+      saved = service
         ? await servicesApi.update(service._id, payload)
         : await servicesApi.create(payload);
-
-      toastSuccess(
-        service ? "Service updated" : "Service created",
-        service ? "The catalogue now shows your changes." : "Your new service is live.",
-      );
-      onSuccess(saved);
     } catch (caught) {
       const apiError = caught instanceof ApiError ? caught : null;
 
@@ -153,11 +158,37 @@ export function ServiceForm({
         });
 
       toastApiError(caught, "Could not save this service.");
+      return;
     }
+
+    const statusChanged = status !== (service?.status ?? "active");
+    if (statusChanged) {
+      try {
+        saved = await servicesApi.setStatus(saved._id, status);
+      } catch (caught) {
+        // The content save already succeeded. Close with that object so the list
+        // does not go stale, and tell the admin exactly what still needs a retry.
+        toastApiError(caught, "Service saved, but its status could not be updated.");
+        onSuccess(saved);
+        return;
+      }
+    }
+
+    toastSuccess(
+      service ? "Service updated" : "Service created",
+      statusChanged
+        ? `The catalogue now shows this service as ${status}.`
+        : service
+          ? "The catalogue now shows your changes."
+          : "Your new service is live.",
+    );
+    onSuccess(saved);
   }
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
+      <input type="hidden" {...form.register("image")} />
+
       <div className="flex flex-wrap items-start gap-5">
         <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-card border border-line bg-blush-light">
           {imageIsSafe ? (
@@ -179,12 +210,16 @@ export function ServiceForm({
             label="Service image file"
             accept="image/jpeg,image/png,image/webp"
             onChange={handleFileChange}
-            hint="JPEG, PNG or WebP up to 5 MB. Uploaded through the authenticated API."
-            error={uploadError ?? undefined}
+            hint={
+              service
+                ? "JPEG, PNG or WebP up to 5 MB. Leave empty to keep the current image."
+                : "JPEG, PNG or WebP up to 5 MB. An image is required."
+            }
+            error={imageError ?? undefined}
           />
           <p className="flex items-center gap-1.5 text-xs text-muted">
             <UploadCloud aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-rose-gold" />
-            Uploading happens when you save. You can also paste a URL instead.
+            Uploading happens when you save. The ImgBB key stays on the server.
           </p>
         </div>
       </div>
@@ -210,12 +245,16 @@ export function ServiceForm({
           {...form.register("category")}
         />
 
-        <Input
-          label="Image URL"
+        <Select
+          label="Status"
           required
-          placeholder="https://i.ibb.co/..." 
-          error={form.formState.errors.image?.message}
-          {...form.register("image")}
+          options={[
+            { value: "active", label: "Active" },
+            { value: "inactive", label: "Inactive" },
+          ]}
+          placeholder="Choose a status"
+          error={form.formState.errors.status?.message}
+          {...form.register("status")}
         />
       </div>
 

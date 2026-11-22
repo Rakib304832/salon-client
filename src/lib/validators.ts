@@ -121,9 +121,10 @@ export type ProfileInput = z.infer<typeof profileSchema>;
 /**
  * Admin service form limits mirror the server's Zod route schema exactly.
  *
- * `status` is deliberately absent: new services start active on the server, and
- * changing status uses the dedicated PATCH /:id/status route. Including status in
- * a PUT would be stripped by the server and could silently mislead the admin.
+ * `status` is part of the form so the admin can choose Active/Inactive, but it
+ * is stripped from the create/update content payload by ServiceForm and applied
+ * through the dedicated PATCH /:id/status route. The server ignores status in a
+ * normal content PUT, so sending it there would silently mislead the admin.
  */
 export const serviceFormSchema = z.object({
   serviceName: z
@@ -146,8 +147,10 @@ export const serviceFormSchema = z.object({
     .int("Duration must be a whole number of minutes.")
     .positive("Duration must be greater than 0.")
     .max(600, "Duration cannot exceed 600 minutes."),
-  // The value is either a pasted URL or the URL returned by /api/uploads.
-  image: z.string().url("Upload an image or enter a valid image URL."),
+  // Create mode requires a file; edit mode keeps this existing URL until a new
+  // file is chosen. The browser never sends an ImgBB key with this value.
+  image: z.string().url("Upload a service image."),
+  status: z.enum(["active", "inactive"], "Choose a service status."),
 });
 /** Raw field values are strings from number inputs; parsed values are numbers. */
 export type ServiceFormValues = z.input<typeof serviceFormSchema>;
