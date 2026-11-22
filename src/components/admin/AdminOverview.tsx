@@ -28,7 +28,7 @@ import type { Appointment } from "@/types";
  *
  * The page is organised around the administrator's likely questions:
  * 1. How large is the salon's account/service catalogue?
- * 2. How many requests are waiting or confirmed?
+ * 2. How many requests are total, waiting or confirmed?
  * 3. How much revenue has Stripe actually confirmed?
  * 4. Which services and newest requests need attention?
  */
@@ -68,8 +68,8 @@ export function AdminOverview() {
           <Skeleton className="h-8 w-72" />
           <Skeleton className="mt-3 h-4 w-96 max-w-full" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[0, 1, 2, 3].map((item) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {[0, 1, 2, 3, 4, 5].map((item) => (
             <Skeleton key={item} className="h-36 w-full rounded-card" />
           ))}
         </div>
@@ -116,7 +116,7 @@ export function AdminOverview() {
         </Button>
       </section>
 
-      <section aria-label="Salon statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Salon statistics" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard
           label="Customers"
           value={counts.customers}
@@ -130,16 +130,28 @@ export function AdminOverview() {
           icon={Scissors}
         />
         <StatCard
+          label="Total requests"
+          value={counts.appointments}
+          hint="Appointments across all customers"
+          icon={CalendarDays}
+        />
+        <StatCard
           label="Pending requests"
           value={counts.pendingAppointments}
-          hint={`${counts.confirmedAppointments} confirmed appointments`}
+          hint="Waiting for salon action"
           icon={Clock3}
+        />
+        <StatCard
+          label="Confirmed"
+          value={counts.confirmedAppointments}
+          hint="Ready for payment or visit"
+          icon={CheckCircle2}
         />
         <StatCard
           label="Paid appointments"
           value={counts.paidAppointments}
           hint={`${counts.paidTransactions} paid Stripe transactions`}
-          icon={CheckCircle2}
+          icon={CreditCard}
         />
       </section>
 
