@@ -20,10 +20,18 @@ import {
 } from "@/lib/appointments";
 import { appointmentsApi } from "@/lib/api";
 import { startCheckout } from "@/lib/checkout";
-import { APPOINTMENT_STATUS_LABELS, ROUTES } from "@/lib/constants";
+import {
+  APPOINTMENT_STATUS_LABELS,
+  PAYMENT_STATUS_LABELS,
+  ROUTES,
+} from "@/lib/constants";
 import { toastApiError, toastInfo, toastSuccess } from "@/lib/toast";
 import { formatCurrency, formatDate, formatDuration } from "@/lib/utils";
-import type { Appointment, AppointmentStatus } from "@/types";
+import type {
+  Appointment,
+  AppointmentStatus,
+  PaymentStatus,
+} from "@/types";
 
 /**
  * CUSTOMER APPOINTMENTS
@@ -40,11 +48,13 @@ import type { Appointment, AppointmentStatus } from "@/types";
  * and then leaves this site.
  *
  * Filtering is client-side because GET /api/appointments/mine already returns
- * the customer's complete history. Keeping filter state in memory (rather than
- * the URL) is intentional: these tabs are a view preference, not shareable
- * search state like the public /services filters.
+ * the customer's complete history. Status tabs and the payment filter can be
+ * combined. Keeping filter state in memory (rather than the URL) is intentional:
+ * these tabs are a view preference, not shareable search state like the public
+ * /services filters.
  */
 type StatusFilter = "all" | AppointmentStatus;
+type PaymentFilter = "all" | PaymentStatus;
 
 interface BusyAction {
   id: string;
@@ -61,6 +71,7 @@ export function CustomerAppointments() {
   } = useCustomerAppointments();
 
   const [filter, setFilter] = useState<StatusFilter>("all");
+  const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("all");
   const [cancelTarget, setCancelTarget] = useState<Appointment | null>(null);
   const [detailsTarget, setDetailsTarget] = useState<Appointment | null>(null);
   const [busy, setBusy] = useState<BusyAction | null>(null);
@@ -75,11 +86,25 @@ export function CustomerAppointments() {
     } satisfies Record<StatusFilter, number>;
   }, [appointments]);
 
+  const paymentCounts = useMemo(() => {
+    const list = appointments ?? [];
+    return {
+      all: list.length,
+      paid: list.filter((item) => item.paymentStatus === "paid").length,
+      unpaid: list.filter((item) => item.paymentStatus === "unpaid").length,
+    } satisfies Record<PaymentFilter, number>;
+  }, [appointments]);
+
   const visible = useMemo(() => {
     if (!appointments) return [];
-    if (filter === "all") return appointments;
-    return appointments.filter((item) => item.status === filter);
-  }, [appointments, filter]);
+    return appointments.filter((item) => {
+      if (filter !== "all" && item.status !== filter) return false;
+      if (paymentFilter !== "all" && item.paymentStatus !== paymentFilter) {
+        return false;
+      }
+      return true;
+    });
+  }, [appointments, filter, paymentFilter]);
 
   // Computed once so the details dialog never needs a non-null assertion.
   const detailService = detailsTarget ? appointmentService(detailsTarget) : null;
@@ -90,6 +115,25 @@ export function CustomerAppointments() {
     { value: "confirmed", label: APPOINTMENT_STATUS_LABELS.confirmed },
     { value: "cancelled", label: APPOINTMENT_STATUS_LABELS.cancelled },
   ];
+
+  const paymentTabs: Array<{ value: PaymentFilter; label: string }> = [
+    { value: "all", label: "All payments" },
+    { value: "paid", label: PAYMENT_STATUS_LABELS.paid },
+    { value: "unpaid", label: PAYMENT_STATUS_LABELS.unpaid },
+  ];
+
+  function resetFilters() {
+    setFilter("all");
+    setPaymentFilter("all");
+  }
+
+  function emptyStateTitle(): string {
+    if (paymentFilter !== "all") {
+      return `No ${PAYMENT_STATUS_LABELS[paymentFilter].toLowerCase()} appointments`;
+    }
+    if (filter === "all") return "No appointments yet";
+    return `No ${APPOINTMENT_STATUS_LABELS[filter].toLowerCase()} appointments`;
+  }
 
   async function confirmCancel() {
     if (!cancelTarget) return;
@@ -196,20 +240,53 @@ export function CustomerAppointments() {
         })}
       </section>
 
+      <section
+        aria-label="Filter appointments by payment state"
+        className="flex flex-wrap items-center gap-2 rounded-card border border-line bg-white p-2"
+      >
+        <span className="px-2 text-xs font-bold uppercase tracking-wider text-muted">
+          Payment
+        </span>
+        {paymentTabs.map((tab) => {
+          const active = paymentFilter === tab.value;
+
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setPaymentFilter(tab.value)}
+              aria-pressed={active}
+              className={`rounded-full px-4 py-2 text-xs font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold ${
+                active
+                  ? "bg-plum text-white"
+                  : "bg-blush-light text-plum hover:bg-blush"
+              }`}
+            >
+              {tab.label}
+              <span className={active ? "ml-2 text-blush" : "ml-2 text-muted"}>
+                {paymentCounts[tab.value]}
+              </span>
+            </button>
+          );
+        })}
+
+        {filter !== "all" || paymentFilter !== "all" ? (
+          <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
+            Clear filters
+          </Button>
+        ) : null}
+      </section>
+
       {visible.length === 0 ? (
         <EmptyState
-          title={
-            filter === "all"
-              ? "No appointments yet"
-              : `No ${APPOINTMENT_STATUS_LABELS[filter].toLowerCase()} appointments`
-          }
+          title={emptyStateTitle()}
           description={
-            filter === "all"
+            filter === "all" && paymentFilter === "all"
               ? "Browse the salon menu and request your first visit."
-              : "Try another status tab to see the rest of your history."
+              : "Try another status or payment filter to see the rest of your history."
           }
           action={
-            filter === "all" ? (
+            filter === "all" && paymentFilter === "all" ? (
               <Link
                 href={ROUTES.services}
                 className={buttonStyles({ variant: "primary" })}
@@ -217,7 +294,7 @@ export function CustomerAppointments() {
                 Browse services
               </Link>
             ) : (
-              <Button variant="outline" onClick={() => setFilter("all")}>
+              <Button variant="outline" onClick={resetFilters}>
                 Show all requests
               </Button>
             )
