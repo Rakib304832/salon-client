@@ -245,10 +245,15 @@ export function AdminTransactions() {
                         </div>
                       </td>
                       <td className="px-5 py-4 font-bold text-plum">
-                        {formatCurrency(
-                          transaction.amount / 100,
-                          transaction.currency.toUpperCase(),
-                        )}
+                        <span className="inline-flex flex-wrap items-center gap-2">
+                          {formatCurrency(
+                            transaction.amount / 100,
+                            transaction.currency.toUpperCase(),
+                          )}
+                          <span className="rounded-full bg-blush-light px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-plum">
+                            {transaction.currency.toUpperCase()}
+                          </span>
+                        </span>
                       </td>
                       <td className="px-5 py-4">
                         <Badge
@@ -341,7 +346,12 @@ function TransactionMobileCard({
         <div className="col-span-2">
           <dt className="text-muted">Amount</dt>
           <dd className="mt-0.5 font-display text-lg font-semibold text-plum">
-            {formatCurrency(transaction.amount / 100, currency)}
+            <span className="inline-flex flex-wrap items-center gap-2">
+              {formatCurrency(transaction.amount / 100, currency)}
+              <span className="rounded-full bg-blush-light px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-plum">
+                {currency}
+              </span>
+            </span>
           </dd>
         </div>
       </dl>
