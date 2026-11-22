@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { RouteGuard } from "@/components/auth";
 import { ServiceDetail } from "@/components/services";
 
 /**
@@ -25,5 +26,12 @@ export default async function ServiceDetailPage({
 }) {
   const { id } = await params;
 
-  return <ServiceDetail serviceId={id} />;
+  // The brief marks service details as protected. Guests are sent to sign-in
+  // with a return URL; blocked accounts see the blocked screen. The booking
+  // form still independently refuses admin submissions.
+  return (
+    <RouteGuard>
+      <ServiceDetail serviceId={id} />
+    </RouteGuard>
+  );
 }
