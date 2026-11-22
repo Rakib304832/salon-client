@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, LogOut, Menu, X } from "lucide-react";
+import { ChevronDown, LayoutDashboard, LogOut, Menu, UserRound, X } from "lucide-react";
 import { useAuth } from "@/components/providers";
 import { buttonStyles, Spinner } from "@/components/ui";
 import { dashboardForRole } from "@/lib/auth";
@@ -50,20 +50,165 @@ interface AuthActionsProps {
   onNavigate?: () => void;
 }
 
-function AuthActions({ onNavigate }: AuthActionsProps) {
-  const { user, isLoading, isBlocked, signOutUser } = useAuth();
+/**
+ * Signed-in profile menu.
+ *
+ * The brief asks for a profile dropdown containing the user's name, Dashboard
+ * and Logout. It is intentionally built from the shared auth context so the
+ * name/role update immediately after sign-in or a profile save. Outside clicks,
+ * Escape and route changes close it; the Express API remains the security
+ * boundary.
+ */
+function ProfileMenu({ onNavigate }: AuthActionsProps) {
+  const { user, isBlocked, signOutUser } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuId = useId();
+  const triggerId = useId();
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- transient menu must close after navigation
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  // user is guaranteed by AuthActions; this explicit guard keeps the component
+  // safe if it is ever reused somewhere without that check.
+  if (!user) return null;
+
+  const dashboardHref = isBlocked
+    ? ROUTES.accountBlocked
+    : dashboardForRole(user.role);
+  const profileHref =
+    user.role === "admin" ? ROUTES.adminProfile : ROUTES.customerProfile;
+
+  function closeMenu() {
+    setOpen(false);
+    onNavigate?.();
+  }
 
   async function handleSignOut() {
+    setSigningOut(true);
     try {
       await signOutUser();
       toastSuccess("You have been signed out");
-      onNavigate?.();
+      closeMenu();
       router.replace(ROUTES.home);
     } catch (error) {
       toastApiError(error, "Could not sign out. Please try again.");
+    } finally {
+      setSigningOut(false);
     }
   }
+
+  const itemStyles =
+    "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-plum transition-colors hover:bg-blush-light focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold disabled:cursor-not-allowed disabled:opacity-60";
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        ref={triggerRef}
+        id={triggerId}
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={menuId}
+        aria-label={`Open profile menu for ${user.name}`}
+        className="flex items-center gap-2 rounded-full border border-line bg-white px-1.5 py-1 transition-colors hover:bg-blush-light focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold sm:px-2"
+      >
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blush text-xs font-bold text-plum">
+          {getInitials(user.name)}
+        </span>
+        <span className="hidden max-w-32 truncate text-sm font-bold text-plum sm:inline">
+          {user.name}
+        </span>
+        <ChevronDown
+          aria-hidden="true"
+          className={`h-4 w-4 text-muted transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open ? (
+        <div
+          id={menuId}
+          role="menu"
+          aria-labelledby={triggerId}
+          className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-card border border-line bg-white shadow-xl"
+        >
+          <div className="border-b border-line px-4 py-3">
+            <p className="truncate text-sm font-bold text-plum">{user.name}</p>
+            <p className="mt-0.5 truncate text-xs text-muted">{user.email}</p>
+          </div>
+
+          <div className="p-1.5">
+            <Link
+              href={dashboardHref}
+              role="menuitem"
+              onClick={closeMenu}
+              className={itemStyles}
+            >
+              <LayoutDashboard aria-hidden="true" className="h-4 w-4 text-rose-gold" />
+              Dashboard
+            </Link>
+            <Link
+              href={profileHref}
+              role="menuitem"
+              onClick={closeMenu}
+              className={itemStyles}
+            >
+              <UserRound aria-hidden="true" className="h-4 w-4 text-rose-gold" />
+              My profile
+            </Link>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => void handleSignOut()}
+              disabled={signingOut}
+              className={`${itemStyles} mt-1 border-t border-line pt-3 text-[#B24A4A]`}
+            >
+              <LogOut aria-hidden="true" className="h-4 w-4" />
+              {signingOut ? "Signing out…" : "Logout"}
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function AuthActions({ onNavigate }: AuthActionsProps) {
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -94,46 +239,7 @@ function AuthActions({ onNavigate }: AuthActionsProps) {
     );
   }
 
-  return (
-    <div className="flex items-center gap-3">
-      {isBlocked ? (
-        <Link
-          href={ROUTES.accountBlocked}
-          onClick={onNavigate}
-          className="rounded-full bg-status-blocked-bg px-3 py-2 text-xs font-bold text-status-blocked-text"
-        >
-          Blocked
-        </Link>
-      ) : (
-        <Link
-          href={dashboardForRole(user.role)}
-          onClick={onNavigate}
-          className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-plum hover:bg-blush-light focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold"
-        >
-          <LayoutDashboard aria-hidden="true" className="h-4 w-4" />
-          <span className="hidden lg:inline">Dashboard</span>
-        </Link>
-      )}
-
-      <span
-        title={user.name}
-        aria-label={`Signed in as ${user.name}`}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blush text-xs font-bold text-plum"
-      >
-        {getInitials(user.name)}
-      </span>
-
-      <button
-        type="button"
-        onClick={() => void handleSignOut()}
-        aria-label="Sign out"
-        title="Sign out"
-        className="rounded-full p-2 text-muted transition-colors hover:bg-blush-light hover:text-plum focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold"
-      >
-        <LogOut aria-hidden="true" className="h-4 w-4" />
-      </button>
-    </div>
-  );
+  return <ProfileMenu onNavigate={onNavigate} />;
 }
 
 export function PublicHeader() {
