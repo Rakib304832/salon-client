@@ -92,8 +92,19 @@
   color: rgb(255 255 255 / 0.74);
 }
 
-.ratingSlot {
-  filter: drop-shadow(0 16px 30px rgb(0 0 0 / 0.35));
+/*
+ * The paper card replaces the rating badge in this slot. Its fixed size and
+ * transparent surface live in HeroPaperCard.module.css; this class supplies
+ * the photo blend and a named anchor for the existing GSAP card marker.
+ */
+.paperSlot {
+  /*
+   * The blend belongs on this positioned wrapper, not on the card inside it:
+   * GSAP leaves a transform on the marker element, which would otherwise make
+   * an inner blend stop at that stacking context and keep the iframe's black
+   * body visible. Here it blends against the hero photograph itself.
+   */
+  mix-blend-mode: screen;
 }
 
 :global([data-theme="dark"]) .heading {

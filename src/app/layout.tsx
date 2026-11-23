@@ -7,6 +7,10 @@ import { ThemeToggle } from "@/components/theme";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 import "./theme.css";
+// Loaded once at the root so every ThreeUI component shares the same canonical
+// class rules. The exact vendored bundle stylesheet is kept alongside it for
+// the registered sources; both are global, so a single import here is enough.
+import "@designcodeio/threeui/style.css";
 import "../shaders/threeui.css";
 
 /**

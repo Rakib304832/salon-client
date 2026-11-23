@@ -1,0 +1,36 @@
+/*
+ * HERO PAPER CARD LAYOUT
+ * ----------------------
+ * The registered scene fills its host with width/height 100%. A fixed-size
+ * slot is therefore essential: without it the WebGL surface would stretch to
+ * the whole hero. The slot lives on the right side of the hero in place of the
+ * former rating badge.
+ */
+.slot {
+  position: relative;
+  width: 320px;
+  height: 420px;
+  max-width: calc(100vw - 2rem);
+}
+
+/*
+ * The exact component sets an opaque #08080a background on both its host and
+ * iframe inline. Inline styles need an !important override here; the actual
+ * WebGL renderer in the canonical source is already created with alpha:true,
+ * so its clear colour is transparent and nothing needs changing inside it.
+ * The hero wrapper applies screen blending so the sandboxed iframe's own
+ * near-black document still drops out over the photograph.
+ */
+.slot :global(.three-d-paper),
+.slot :global(.three-d-paper iframe) {
+  background: transparent !important;
+}
+
+@media (max-width: 640px) {
+  /* Keep the card proportionally smaller so it never dominates the hero or
+     pushes the original heading and buttons off a narrow viewport. */
+  .slot {
+    width: min(280px, calc(100vw - 2rem));
+    height: 367px;
+  }
+}
