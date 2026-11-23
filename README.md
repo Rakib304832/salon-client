@@ -73,7 +73,8 @@ Stripe, or ImgBB. It only calls the Express API using cookies and
 | --- | --- |
 | Client repository | <https://github.com/Rakib304832/salon-client.git> |
 | Server repository | <https://github.com/Rakib304832/Salon-server-site.git> |
-| Live deployment | **Pending** — replace this after the final Vercel/production deployment |
+| Live deployment | <https://salonbook-client-rakib-299e.vercel.app> |
+| Live API | <https://salonbook-server-rakib-299e.vercel.app> |
 | Manual test guide | [docs/VERIFICATION.md](docs/VERIFICATION.md) |
 
 ---
