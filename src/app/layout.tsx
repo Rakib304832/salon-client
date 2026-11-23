@@ -89,7 +89,14 @@ export default function RootLayout({
         */}
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
       </head>
-      <body className="min-h-screen bg-ivory text-text antialiased">
+      <body
+        className="min-h-screen bg-ivory text-text antialiased"
+        // Browser extensions (e.g. Grammarly) inject attributes such as
+        // cz-shortcut-listen onto <body> before React hydrates. Tell React to
+        // keep the DOM's attributes so these third-party mutations don't
+        // surface as a hydration mismatch.
+        suppressHydrationWarning
+      >
         {/*
           Keyboard users can jump straight past repeated navigation. The link is
           visually hidden until focused, and every page shell exposes the matching
