@@ -33,6 +33,8 @@ export { Input } from "./Input";
 export type { InputProps } from "./Input";
 export { Modal } from "./Modal";
 export type { ModalProps } from "./Modal";
+export { PasswordRules } from "./PasswordRules";
+export type { PasswordRulesProps } from "./PasswordRules";
 export { Select } from "./Select";
 export type { SelectOption, SelectProps } from "./Select";
 export { Skeleton, SkeletonCard, SkeletonGrid, SkeletonTable } from "./Skeleton";

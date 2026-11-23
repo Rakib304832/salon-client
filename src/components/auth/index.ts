@@ -7,6 +7,8 @@ export { AccountBlocked } from "./AccountBlocked";
 export { AuthFormSkeleton } from "./AuthFormSkeleton";
 export { GoogleButton } from "./GoogleButton";
 export type { GoogleButtonProps } from "./GoogleButton";
+export { ImageUploadField } from "./ImageUploadField";
+export type { ImageUploadFieldProps } from "./ImageUploadField";
 export {
   AdminGuard,
   CustomerGuard,

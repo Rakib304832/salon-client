@@ -33,7 +33,7 @@ if (!API_BASE_URL && process.env.NODE_ENV !== "production") {
   // Development-only hint. We do not throw at module load because next build
   // must still succeed before env files are configured on a new machine.
   console.warn(
-    "[SalonBook] NEXT_PUBLIC_API_URL is not set. API calls will fail until it is configured.",
+    "[SalonBook] NEXT_PUBLIC_API_URL is not set. Add it to .env.local as the API origin (e.g. http://localhost:5000, without /api) and restart the dev server.",
   );
 }
 
@@ -76,7 +76,8 @@ export interface ApiRequestOptions extends Omit<RequestInit, "body"> {
 export function apiUrl(path: string, params?: QueryParams): string {
   if (!API_BASE_URL) {
     throw new ApiError({
-      message: "NEXT_PUBLIC_API_URL is not configured.",
+      message:
+        "API URL is not configured. Set NEXT_PUBLIC_API_URL in .env.local to the API origin, then restart the dev server.",
       status: 500,
       code: "MISSING_API_URL",
     });

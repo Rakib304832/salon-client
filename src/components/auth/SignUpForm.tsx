@@ -1,41 +1,27 @@
 "use client";
 
-import { useState, type ChangeEvent } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Eye,
-  EyeOff,
-  ImagePlus,
-  LockKeyhole,
-  Mail,
-  UserRound,
-} from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Eye, EyeOff, LockKeyhole, Mail, UserRound } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
 import { useAuth } from "@/components/providers";
-import { Button, Input } from "@/components/ui";
-import { ApiError, uploadsApi } from "@/lib/api";
+import { Button, Input, PasswordRules } from "@/components/ui";
 import { dashboardForRole, signUpWithEmail } from "@/lib/auth";
-import { API_ERROR_CODES, ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/constants";
 import { toastApiError, toastError, toastInfo, toastSuccess } from "@/lib/toast";
 import { safeRedirectPath } from "@/lib/utils";
 import { signUpSchema, type SignUpInput } from "@/lib/validators";
 import { GoogleButton } from "./GoogleButton";
+import { ImageUploadField } from "./ImageUploadField";
 
 /**
  * SIGN-UP FORM
  * ------------
- * Image strategy follows the server contract:
- * - The URL field is the primary path. It works before sign-in and is always
- *   submitted with the registration request.
- * - A file picker attempts the authenticated /api/uploads endpoint as a
- *   convenience. If the server answers 401 (expected for a guest), we show an
- *   inline explanation and leave the URL field available instead of failing the
- *   whole registration.
- *
- * Password rules mirror the Zod schema: at least 6 characters with one upper
- * and one lowercase letter. The server validates again, as it must.
+ * Registration sends the chosen profile-image URL with the request. The file
+ * picker is a convenience for signed-in users; guests can paste a URL and add
+ * a photo later. Layout and password checklist follow the Figma design.
  */
 export function SignUpForm() {
   const router = useRouter();
@@ -43,8 +29,6 @@ export function SignUpForm() {
   const { refresh } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
 
   const rawReturnTo = searchParams.get("returnTo");
   const returnTo = safeRedirectPath(rawReturnTo, ROUTES.home);
@@ -59,54 +43,8 @@ export function SignUpForm() {
     },
   });
 
-  async function handleImageFile(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toastError("Choose an image file", "PNG, JPG or WebP works best.");
-      event.target.value = "";
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toastError("Image is too large", "Please choose a file under 5 MB.");
-      event.target.value = "";
-      return;
-    }
-
-    setUploading(true);
-    setUploadMessage(null);
-
-    try {
-      const uploaded = await uploadsApi.uploadImage(file);
-      form.setValue("image", uploaded.url, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-      setUploadMessage("Image uploaded. You can still edit the URL below.");
-      toastSuccess("Profile image uploaded");
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 401) {
-        setUploadMessage(
-          "Photo upload needs a signed-in session. Paste an image URL for now — you can upload a photo later from your profile.",
-        );
-      } else if (
-        error instanceof ApiError &&
-        error.code === API_ERROR_CODES.UPLOAD_RATE_LIMITED
-      ) {
-        setUploadMessage(
-          "Too many uploads right now. Paste an image URL and try again later.",
-        );
-      } else {
-        toastApiError(error, "Could not upload this image.");
-      }
-    } finally {
-      setUploading(false);
-      // Allows choosing the same file again after a failed attempt.
-      event.target.value = "";
-    }
-  }
+  const password = useWatch({ control: form.control, name: "password" });
+  const imageUrl = useWatch({ control: form.control, name: "image" });
 
   async function onSubmit(values: SignUpInput) {
     try {
@@ -137,9 +75,7 @@ export function SignUpForm() {
         return;
       }
 
-      router.replace(
-        rawReturnTo ? returnTo : dashboardForRole(user.role),
-      );
+      router.replace(rawReturnTo ? returnTo : dashboardForRole(user.role));
     } catch (error) {
       toastApiError(error, "Could not create your account. Please try again.");
     }
@@ -152,28 +88,17 @@ export function SignUpForm() {
   return (
     <div className="space-y-7">
       <header>
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-rose-gold">
-          Join SalonBook
-        </p>
-        <h1 className="mt-2 text-3xl">Create your account</h1>
+        <h1 className="text-3xl">Create your account</h1>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Book trusted salon services and keep every appointment in one place.
+          Join SalonBook and book your next appointment in minutes.
         </p>
       </header>
-
-      <GoogleButton returnTo={rawReturnTo} label="Sign up with Google" />
-
-      <div className="flex items-center gap-3 text-xs text-muted">
-        <span className="h-px flex-1 bg-line" />
-        <span>or register with email</span>
-        <span className="h-px flex-1 bg-line" />
-      </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
         <Input
           type="text"
-          label="Full name"
-          placeholder="Your name"
+          label="Full Name"
+          placeholder="Maya Rahman"
           autoComplete="name"
           leadingIcon={<UserRound aria-hidden="true" className="h-4 w-4" />}
           error={form.formState.errors.name?.message}
@@ -182,7 +107,7 @@ export function SignUpForm() {
 
         <Input
           type="email"
-          label="Email address"
+          label="Email"
           placeholder="you@example.com"
           autoComplete="email"
           leadingIcon={<Mail aria-hidden="true" className="h-4 w-4" />}
@@ -197,7 +122,6 @@ export function SignUpForm() {
             placeholder="At least 6 characters"
             autoComplete="new-password"
             className="pr-12"
-            hint="Use at least 6 characters with one uppercase and one lowercase letter."
             leadingIcon={<LockKeyhole aria-hidden="true" className="h-4 w-4" />}
             error={form.formState.errors.password?.message}
             {...form.register("password")}
@@ -216,36 +140,17 @@ export function SignUpForm() {
           </button>
         </div>
 
-        <div className="space-y-2 rounded-input border border-dashed border-line bg-blush-light/60 p-3">
-          <label
-            htmlFor="signup-image-file"
-            className="flex cursor-pointer items-center gap-2 text-sm font-bold text-plum"
-          >
-            <ImagePlus aria-hidden="true" className="h-4 w-4" />
-            {uploading ? "Uploading…" : "Upload a photo (optional)"}
-          </label>
-          <input
-            id="signup-image-file"
-            type="file"
-            accept="image/*"
-            disabled={uploading}
-            onChange={(event) => void handleImageFile(event)}
-            className="block w-full text-xs text-muted file:mr-3 file:rounded-full file:border-0 file:bg-plum file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-white hover:file:bg-plum-dark disabled:opacity-60"
-          />
-          {uploadMessage ? (
-            <p role="status" className="text-xs leading-5 text-muted">
-              {uploadMessage}
-            </p>
-          ) : null}
-        </div>
+        <PasswordRules password={password ?? ""} />
 
-        <Input
-          type="url"
-          label="Profile image URL"
-          placeholder="https://…"
-          hint="Paste an image URL instead of uploading if you are not signed in yet."
+        <ImageUploadField
+          value={imageUrl ?? ""}
+          onChange={(value) =>
+            form.setValue("image", value, {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+          }
           error={form.formState.errors.image?.message}
-          {...form.register("image")}
         />
 
         <Button
@@ -256,6 +161,14 @@ export function SignUpForm() {
           Create account
         </Button>
       </form>
+
+      <div className="flex items-center gap-3 text-xs text-muted">
+        <span className="h-px flex-1 bg-line" />
+        <span>or</span>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+
+      <GoogleButton returnTo={rawReturnTo} label="Sign up with Google" />
 
       <p className="text-center text-sm text-muted">
         Already have an account?{" "}

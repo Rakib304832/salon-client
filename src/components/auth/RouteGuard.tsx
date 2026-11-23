@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import { AlertCircle } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { ErrorState, Spinner } from "@/components/ui";
+import { Button, ErrorState, Spinner } from "@/components/ui";
 import { dashboardForRole } from "@/lib/auth";
 import { ROUTES } from "@/lib/constants";
 import type { UserRole } from "@/types";
@@ -30,6 +31,46 @@ function GuardLoading() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <Spinner size="lg" label="Checking your session" />
+    </div>
+  );
+}
+
+/**
+ * Non-blocking session warning for the guest-only auth pages.
+ *
+ * A failed session check must not hide the sign-in/sign-up form. If the API is
+ * down or misconfigured the visitor can still try to sign in, and the normal
+ * form error handling explains what happened. The warning simply makes the
+ * underlying problem visible and offers a retry.
+ */
+function SessionWarning({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div
+      role="status"
+      className="mb-8 flex flex-col gap-3 rounded-card border border-line bg-blush-light px-4 py-3 text-plum sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div className="flex items-start gap-2">
+        <AlertCircle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+        <div className="text-sm">
+          <p className="font-bold">We could not check your session</p>
+          <p className="text-muted">{message}</p>
+        </div>
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="self-start sm:self-auto"
+        onClick={onRetry}
+      >
+        Try again
+      </Button>
     </div>
   );
 }
@@ -116,20 +157,17 @@ export function GuestOnly({ children }: { children: ReactNode }) {
 
   if (status === "loading") return <GuardLoading />;
 
-  if (error) {
-    return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <ErrorState
-          title="We could not check your session"
-          message={error}
-          onRetry={() => void refresh()}
-        />
-      </div>
-    );
-  }
-
   if (isBlocked) return <AccountBlocked />;
   if (user) return <GuardLoading />; // redirect in progress
 
-  return <>{children}</>;
+  // Unlike protected routes, an auth page stays usable when the session check
+  // fails: showing the form is more helpful than a dead end with only a retry.
+  return (
+    <>
+      {error ? (
+        <SessionWarning message={error} onRetry={() => void refresh()} />
+      ) : null}
+      {children}
+    </>
+  );
 }

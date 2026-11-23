@@ -1,0 +1,191 @@
+/* ---------------------------------------------------------------------------
+ * MOTION LAYER
+ * ---------------------------------------------------------------------------
+ * One place for every timing, distance and easing used by the page. Components
+ * opt in with a single class instead of repeating transition strings, so the
+ * whole site moves at the same speed.
+ *
+ * The rules this file follows:
+ * - Transform, colour and opacity only. Nothing animates width, height or margin.
+ * - Hover exists for fine pointers only; keyboard focus shows the same state.
+ * - Distances are deliberately small: a card lifts 2px, a picture grows 1.03.
+ * - Reduced motion keeps every colour change and drops every movement.
+ * --------------------------------------------------------------------------- */
+
+:root {
+  /* Durations */
+  --m-in: 150ms; /* hover in */
+  --m-out: 120ms; /* hover out */
+  --m-press: 90ms; /* pointer down */
+  --m-card-in: 180ms; /* linked card lift */
+  --m-image-in: 600ms; /* picture zoom in */
+  --m-image-out: 400ms; /* picture zoom out */
+
+  /* Curves: one UI ease-out for every step, no bounce, no overshoot */
+  --m-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Copy colours for the statement moment (both pass 4:1 on the blush band) */
+  --statement-rest: #7e6f73;
+  --statement-accent: #a9653f;
+
+  /* Soft ink shadow, 10% at most */
+  --m-shadow: 0 12px 24px -12px rgb(46 26 40 / 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --m-in: 0ms;
+    --m-out: 0ms;
+    --m-press: 0ms;
+    --m-card-in: 0ms;
+    --m-image-in: 0ms;
+    --m-image-out: 0ms;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * LINKED CARD
+ * ---------------------------------------------------------------------------
+ * A card that leads somewhere answers the pointer: it lifts 2px, its border
+ * darkens a step and a soft shadow appears only while hovered. Cards without a
+ * link stay still.
+ * --------------------------------------------------------------------------- */
+.m-card {
+  transition:
+    transform var(--m-out) var(--m-ease),
+    border-color var(--m-out) var(--m-ease),
+    box-shadow var(--m-out) var(--m-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .m-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--rose-gold) 55%, var(--line));
+    box-shadow: var(--m-shadow);
+    transition-duration: var(--m-card-in);
+  }
+}
+
+/* Keyboard users get the same state as mouse users. */
+.m-card:focus-visible,
+.m-card:has(:focus-visible) {
+  border-color: color-mix(in oklab, var(--rose-gold) 55%, var(--line));
+  box-shadow: var(--m-shadow);
+}
+
+/* ---------------------------------------------------------------------------
+ * PICTURE IN A LINKED CARD
+ * ---------------------------------------------------------------------------
+ * The frame never grows and the card never changes size: only the image inside
+ * the overflow-hidden frame scales, 1.03 at most.
+ * --------------------------------------------------------------------------- */
+.m-zoom {
+  overflow: hidden;
+}
+
+.m-zoom img {
+  transition: transform var(--m-image-out) var(--m-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .m-card:hover .m-zoom img,
+  .m-zoom:hover img {
+    transform: scale(1.03);
+    transition-duration: var(--m-image-in);
+  }
+}
+
+.m-zoom:focus-visible img,
+.m-card:has(:focus-visible) .m-zoom img {
+  transform: scale(1.03);
+}
+
+/* ---------------------------------------------------------------------------
+ * BUTTON
+ * ---------------------------------------------------------------------------
+ * Steps up 1px on hover, sinks 1px and scales .985 while pressed. The colour
+ * change comes from the variant classes; this file owns the movement so no
+ * component sets its own transform.
+ * --------------------------------------------------------------------------- */
+.m-btn {
+  transition:
+    transform var(--m-out) var(--m-ease),
+    background-color var(--m-out) var(--m-ease),
+    border-color var(--m-out) var(--m-ease),
+    color var(--m-out) var(--m-ease),
+    filter var(--m-out) var(--m-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .m-btn:hover {
+    transform: translateY(-1px);
+    transition-duration: var(--m-in);
+  }
+}
+
+.m-btn:active {
+  transform: translateY(1px) scale(0.985);
+  transition-duration: var(--m-press);
+}
+
+/* ---------------------------------------------------------------------------
+ * NAV WORD
+ * ---------------------------------------------------------------------------
+ * Nav and footer words rest without a line; the line draws left to right on
+ * hover and focus. The current page keeps a 2px bar instead.
+ * --------------------------------------------------------------------------- */
+.m-nav {
+  position: relative;
+}
+
+.m-nav::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--m-out) var(--m-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .m-nav:hover::after {
+    transform: scaleX(1);
+    transition-duration: var(--m-in);
+  }
+}
+
+.m-nav:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.m-nav[aria-current="page"]::after {
+  height: 2px;
+  transform: scaleX(1);
+}
+
+/* ---------------------------------------------------------------------------
+ * REDUCED MOTION
+ * ---------------------------------------------------------------------------
+ * Colours still change. Nothing travels, scales or lifts, and nothing that GSAP
+ * would otherwise animate is left hidden, because GSAP never runs the entrance
+ * under this preference.
+ * --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .m-card:hover,
+  .m-card:focus-visible,
+  .m-btn:hover,
+  .m-btn:active {
+    transform: none;
+  }
+
+  .m-zoom img,
+  .m-card:hover .m-zoom img,
+  .m-card:focus-visible .m-zoom img,
+  .m-zoom:focus-visible img {
+    transform: none;
+  }
+}

@@ -11,7 +11,11 @@ import {
 import { servicesApi } from "@/lib/api";
 import {
   API_CATEGORIES,
+  CATEGORY_PILL_OPTIONS,
+  isCoveredApiCategory,
   isServiceSort,
+  resolveCategorySelection,
+  type CategoryPillOption,
   type ServiceSort,
 } from "@/lib/constants";
 import type { Service } from "@/types";
@@ -21,21 +25,12 @@ import { ServiceFilters } from "./ServiceFilters";
 /**
  * SERVICE BROWSER
  * ---------------
- * Client-side orchestration for /services.
+ * Client-side orchestration for /services. The URL remains the state container
+ * so category tiles can link here and browser Back/Forward restores filters.
  *
- * Why the URL is the state container:
- * - The Home category tiles already link here as /services?category=...
- * - Filters can be bookmarked or shared.
- * - Browser Back/Forward restores the exact search, category and sort.
- *
- * Next.js 16 note: useSearchParams() is a Client Component hook. The page wraps
- * this component in <Suspense>, which is required for a prerendered route.
- *
- * Request freshness:
- * The server can answer older requests after newer ones. Each result is stored
- * with the exact filter key that requested it, and the UI only shows a result
- * whose key matches the current URL. A slow stale response can never replace
- * fresh results.
+ * Figma labels such as "Hair Coloring" are resolved to the short API category
+ * "Hair" before fetching, while the friendly label stays in the URL and in the
+ * selected pill.
  */
 interface ResultsState {
   key: string;
@@ -64,29 +59,21 @@ export function ServiceBrowser() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // URL values are strings and may be absent, duplicated or invalid. Normalise
-  // once here so the fetch, the form and the result header all agree.
   const search = (searchParams.get("search") ?? "").trim();
   const category = searchParams.get("category") ?? "";
   const rawSort = searchParams.get("sort") ?? "";
   const sort: ServiceSort = isServiceSort(rawSort) ? rawSort : "";
+  const selection = resolveCategorySelection(category);
+  const categoryQuery = selection?.query ?? "";
 
-  // The input reacts instantly; only the URL/API update is debounced in the
-  // filter component.
   const [searchDraft, setSearchDraft] = useState(search);
   const [lastSyncedSearch, setLastSyncedSearch] = useState(search);
 
-  // React's documented "adjust state when a prop changes" pattern. Doing this
-  // during render (instead of in an effect) avoids a cascading extra render.
-  // It keeps Back/Forward and Clear in sync with the URL without a listener.
   if (search !== lastSyncedSearch) {
     setLastSyncedSearch(search);
     setSearchDraft(search);
   }
 
-  // Shared constants are the fallback while the unfiltered catalogue loads or
-  // if that secondary request fails. A successful response replaces them with
-  // the real categories used by the current salon data.
   const [categories, setCategories] = useState<string[]>(() => [
     ...API_CATEGORIES,
   ]);
@@ -94,7 +81,7 @@ export function ServiceBrowser() {
   const [results, setResults] = useState<ResultsState | null>(null);
   const [reloadCount, setReloadCount] = useState(0);
 
-  const requestKey = `${search}\u0000${category}\u0000${sort}\u0000${reloadCount}`;
+  const requestKey = `${search}\u0000${categoryQuery}\u0000${sort}\u0000${reloadCount}`;
   const isCurrentResult = results?.key === requestKey;
   const loading = !isCurrentResult;
   const error = isCurrentResult ? results.error : null;
@@ -102,7 +89,6 @@ export function ServiceBrowser() {
 
   const hasActiveFilters = Boolean(search || category || sort);
 
-  /** Merges one filter into the existing query and replaces the history entry. */
   const updateParam = useCallback(
     (name: "search" | "category" | "sort", value: string) => {
       if ((searchParams.get(name) ?? "") === value) return;
@@ -112,8 +98,6 @@ export function ServiceBrowser() {
       else params.delete(name);
 
       const query = params.toString();
-      // replace() avoids filling the history stack with every search keystroke.
-      // scroll:false keeps the user next to the results while filtering.
       router.replace(query ? `${pathname}?${query}` : pathname, {
         scroll: false,
       });
@@ -127,16 +111,13 @@ export function ServiceBrowser() {
   );
 
   const clearFilters = useCallback(() => {
-    // Also reset an uncommitted draft; otherwise Clear would leave stale text
-    // in the input when no URL query existed yet.
     setSearchDraft("");
-
     if (searchParams.toString().length === 0) return;
     router.replace(pathname, { scroll: false });
   }, [pathname, router, searchParams]);
 
-  // Secondary request for the category <select>. It is unfiltered on purpose:
-  // a category-filtered response could not show the other available options.
+  // Secondary request keeps the pill list aware of categories that are not part
+  // of the seven curated design groups, such as Waxing and Bridal.
   useEffect(() => {
     let active = true;
 
@@ -148,8 +129,7 @@ export function ServiceBrowser() {
         setCategories(derived.length > 0 ? derived : [...API_CATEGORIES]);
       })
       .catch(() => {
-        // Keep the constant fallback already in state. A filter-option failure
-        // should not break the primary results grid.
+        // Keep the constant fallback already in state.
       });
 
     return () => {
@@ -157,13 +137,11 @@ export function ServiceBrowser() {
     };
   }, []);
 
-  // Primary request. The key written with the response makes stale answers
-  // harmless, and no loading flag needs to be toggled synchronously here.
   useEffect(() => {
     let active = true;
 
     servicesApi
-      .list({ search, category, sort })
+      .list({ search, category: categoryQuery, sort })
       .then((data) => {
         if (!active) return;
         setResults({ key: requestKey, items: data, error: null });
@@ -183,34 +161,44 @@ export function ServiceBrowser() {
     return () => {
       active = false;
     };
-  }, [search, category, sort, requestKey]);
+  }, [search, categoryQuery, sort, requestKey]);
 
-  // Add the active category even when the catalogue request has not provided
-  // its options yet, so a shared link never shows an empty <select> value.
-  const categoryOptions = useMemo(() => {
-    const values = new Set(categories);
-    if (category) values.add(category);
-    return Array.from(values).sort((a, b) => a.localeCompare(b));
-  }, [categories, category]);
+  const categoryOptions = useMemo<CategoryPillOption[]>(() => {
+    const options: CategoryPillOption[] = [...CATEGORY_PILL_OPTIONS];
+
+    for (const value of categories) {
+      if (isCoveredApiCategory(value)) continue;
+      if (!options.some((option) => option.value === value)) {
+        options.push({ label: value, value });
+      }
+    }
+
+    if (
+      selection &&
+      !options.some((option) => option.value === selection.label)
+    ) {
+      options.push({ label: selection.label, value: selection.label });
+    }
+
+    return options;
+  }, [categories, selection]);
 
   function handleRetry() {
-    // Changing reloadCount changes requestKey, which puts the grid back into
-    // its loading state and re-runs the primary effect.
     setReloadCount((count) => count + 1);
   }
 
   const resultLabel = loading
     ? "Loading services…"
     : hasActiveFilters
-      ? `${services.length} ${services.length === 1 ? "service" : "services"} found`
-      : `${services.length} ${services.length === 1 ? "service" : "services"} available`;
+      ? `Showing ${services.length} ${services.length === 1 ? "service" : "services"}`
+      : `Showing ${services.length} active services`;
 
   return (
     <div>
       <ServiceFilters
         searchValue={search}
         searchDraft={searchDraft}
-        categoryValue={category}
+        categoryValue={selection?.label ?? category}
         sortValue={sort}
         categoryOptions={categoryOptions}
         onSearchChange={setSearchDraft}

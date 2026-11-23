@@ -32,7 +32,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       {label ? (
         <label htmlFor={inputId} className="block text-sm font-bold text-plum">
           {label}
-          {required ? <span className="ml-0.5 text-[#B24A4A]">*</span> : null}
+          {required ? <span className="ml-0.5 text-status-blocked-text">*</span> : null}
         </label>
       ) : null}
 
@@ -55,7 +55,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           className={cn(
             "w-full rounded-input border border-line bg-white px-3.5 py-2.5 text-sm text-text placeholder:text-muted focus:border-rose-gold focus:outline-none focus:ring-2 focus:ring-blush disabled:cursor-not-allowed disabled:bg-blush-light",
             leadingIcon && "pl-10",
-            error && "border-[#B24A4A] focus:border-[#B24A4A] focus:ring-[#F6DCDC]",
+            error && "border-status-blocked-text focus:border-status-blocked-text focus:ring-status-blocked-bg",
             className,
           )}
           {...props}
@@ -68,7 +68,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         </p>
       ) : null}
       {error ? (
-        <p id={errorId} role="alert" className="text-xs font-medium text-[#B24A4A]">
+        <p id={errorId} role="alert" className="text-xs font-medium text-status-blocked-text">
           {error}
         </p>
       ) : null}

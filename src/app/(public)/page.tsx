@@ -1,25 +1,23 @@
 import type { Metadata } from "next";
 import {
   CategoryTiles,
+  CtaBand,
   FeaturedServices,
   HeroBanner,
-  WhySalonBook,
+  WhyChooseUs,
 } from "@/components/home";
+import { HomeMotion } from "@/components/motion";
 
 /**
  * HOME PAGE
  * ---------
- * This is intentionally a thin Server Component composition. The public route
- * group layout supplies the navbar and footer; this file only chooses section
- * order. Each section owns its own comments and data requirements:
+ * Thin Server Component composition. Section order follows the Figma design:
+ * hero, categories, featured services, why choose us, then the final CTA band.
+ * The public layout supplies the navbar and footer.
  *
- * 1. HeroBanner        — static banner and primary calls to action
- * 2. FeaturedServices  — live preview from GET /api/services
- * 3. CategoryTiles     — the seven brief categories
- * 4. WhySalonBook      — extra explainer + final call to action (`#why-us`)
- *
- * Keeping the page this small makes later design tweaks a one-line reorder
- * instead of a large edit.
+ * HomeMotion owns the <main> element and the page's two scripted motions: the
+ * hero entrance and the statement moment. Every section inside it is still a
+ * Server Component, so no section markup is shipped as client JavaScript.
  */
 export const metadata: Metadata = {
   description:
@@ -28,11 +26,12 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <main id="main-content">
+    <HomeMotion>
       <HeroBanner />
-      <FeaturedServices />
       <CategoryTiles />
-      <WhySalonBook />
-    </main>
+      <FeaturedServices />
+      <WhyChooseUs />
+      <CtaBand />
+    </HomeMotion>
   );
 }

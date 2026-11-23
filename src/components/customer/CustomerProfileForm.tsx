@@ -261,7 +261,7 @@ export function CustomerProfileForm({
               </p>
             ) : null}
             {uploadError ? (
-              <p role="alert" className="text-xs font-bold text-[#B24A4A]">
+              <p role="alert" className="text-xs font-bold text-status-blocked-text">
                 {uploadError}
               </p>
             ) : null}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, LayoutDashboard, LogOut, Menu, UserRound, X } from "lucide-react";
 import { useAuth } from "@/components/providers";
+import { ThemeToggle } from "@/components/theme";
 import { buttonStyles, Spinner } from "@/components/ui";
 import { dashboardForRole } from "@/lib/auth";
 import { ROUTES } from "@/lib/constants";
@@ -36,7 +37,7 @@ interface NavLink {
 
 const NAV_LINKS: NavLink[] = [
   { href: ROUTES.home, label: "Home", exact: true },
-  { href: ROUTES.services, label: "Services" },
+  { href: ROUTES.services, label: "Browse Services" },
   { href: `${ROUTES.home}#why-us`, label: "Why SalonBook" },
 ];
 
@@ -195,7 +196,7 @@ function ProfileMenu({ onNavigate }: AuthActionsProps) {
               role="menuitem"
               onClick={() => void handleSignOut()}
               disabled={signingOut}
-              className={`${itemStyles} mt-1 border-t border-line pt-3 text-[#B24A4A]`}
+              className={`${itemStyles} mt-1 border-t border-line pt-3 text-status-blocked-text`}
             >
               <LogOut aria-hidden="true" className="h-4 w-4" />
               {signingOut ? "Signing out…" : "Logout"}
@@ -226,14 +227,14 @@ function AuthActions({ onNavigate }: AuthActionsProps) {
           onClick={onNavigate}
           className="hidden rounded-full px-4 py-2 text-sm font-bold text-plum hover:bg-blush-light focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold sm:inline-flex"
         >
-          Sign in
+          Sign In
         </Link>
         <Link
           href={ROUTES.signUp}
           onClick={onNavigate}
           className={buttonStyles({ variant: "accent", size: "sm" })}
         >
-          Get started
+          Sign Up
         </Link>
       </div>
     );
@@ -271,7 +272,7 @@ export function PublicHeader() {
               key={link.href}
               href={link.href}
               aria-current={isActive(pathname, link) ? "page" : undefined}
-              className={`rounded-full px-1 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold ${
+              className={`m-nav rounded-full px-1 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold ${
                 isActive(pathname, link)
                   ? "text-sm font-bold text-rose-gold"
                   : "text-sm font-medium text-muted transition-colors hover:text-plum"
@@ -282,8 +283,18 @@ export function PublicHeader() {
           ))}
         </nav>
 
+        {/* The switch lives in the navbar because it is the one control that
+            applies to every page, not just this public shell. */}
+        <div className="hidden md:block">
+          <ThemeToggle local />
+        </div>
+
         <div className="hidden md:block">
           <AuthActions />
+        </div>
+
+        <div className="md:hidden">
+          <ThemeToggle local />
         </div>
 
         <button

@@ -278,7 +278,7 @@ export function AdminUsers() {
                                 className={
                                   item.isBlocked
                                     ? undefined
-                                    : "text-[#B24A4A] hover:bg-[#FCEDED]"
+                                    : "text-status-blocked-text hover:bg-status-blocked-bg"
                                 }
                                 onClick={() =>
                                   setBlockTarget({
@@ -410,7 +410,7 @@ function UserMobileCard({
             loading={busy}
             disabled={disabled}
             className={
-              user.isBlocked ? undefined : "text-[#B24A4A] hover:bg-[#FCEDED]"
+              user.isBlocked ? undefined : "text-status-blocked-text hover:bg-status-blocked-bg"
             }
             onClick={onToggleBlock}
           >

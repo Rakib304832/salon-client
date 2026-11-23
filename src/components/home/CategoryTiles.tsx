@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   Crown,
   Droplet,
@@ -12,24 +11,25 @@ import {
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
-import { ErrorState, Skeleton } from "@/components/ui";
+import { EmptyState, ErrorState, Skeleton } from "@/components/ui";
 import { servicesApi } from "@/lib/api";
-import { API_CATEGORIES, HOME_CATEGORIES, ROUTES } from "@/lib/constants";
+import {
+  HOME_CATEGORIES,
+  HOME_CATEGORY_GROUPS,
+  ROUTES,
+  type HomeCategory,
+} from "@/lib/constants";
 import type { Service } from "@/types";
+import { CategoryCard } from "./CategoryCard";
 
 /**
  * HOME CATEGORY TILES
  * -------------------
- * The brief wants salon service categories on the Home page, and the dynamic
- * section should come from real data. This component reads the public
- * active-only service list, derives the categories actually in the catalogue,
- * and keeps the seven curated categories as a stable fallback/ordering. Extra
- * server categories such as Waxing or Bridal are appended automatically.
- *
- * Every tile links to /services?category=... . Loading, failure and retry are
- * explicit so a slow/offline API never leaves an empty grid.
+ * The Figma design shows seven numbered tiles. Live services are grouped into
+ * those design categories using API category plus service-name keywords; the
+ * link still queries the real short category value accepted by the server.
  */
-const CATEGORY_ICONS: Partial<Record<string, LucideIcon>> = {
+const CATEGORY_ICONS: Record<HomeCategory, LucideIcon> = {
   "Haircut & Styling": Scissors,
   "Hair Coloring": Palette,
   "Hair Treatment": Droplet,
@@ -37,36 +37,18 @@ const CATEGORY_ICONS: Partial<Record<string, LucideIcon>> = {
   Makeup: Crown,
   "Manicure & Pedicure": Hand,
   "Spa & Massage": Flower2,
-  Waxing: Sparkles,
-  Bridal: Crown,
 };
 
-const KNOWN_CATEGORIES: readonly string[] = API_CATEGORIES;
-
 interface CategoryTile {
-  name: string;
-  count: number;
+  label: HomeCategory;
+  href: string;
 }
 
-function buildCategoryTiles(services: Service[]): CategoryTile[] {
-  const counts = new Map<string, number>();
-
-  for (const service of services) {
-    const name = service.category?.trim();
-    if (!name) continue;
-    counts.set(name, (counts.get(name) ?? 0) + 1);
-  }
-
-  const activeCategories = [...counts.keys()];
-  const ordered = [
-    ...KNOWN_CATEGORIES.filter((category) => counts.has(category)),
-    ...HOME_CATEGORIES.filter((category) => !counts.has(category)),
-    ...activeCategories
-      .filter((category) => !KNOWN_CATEGORIES.includes(category))
-      .sort((a, b) => a.localeCompare(b)),
-  ];
-
-  return ordered.map((name) => ({ name, count: counts.get(name) ?? 0 }));
+function buildCategoryTiles(): CategoryTile[] {
+  return HOME_CATEGORY_GROUPS.map((group) => ({
+    label: group.label,
+    href: `${ROUTES.services}?category=${encodeURIComponent(group.label)}`,
+  }));
 }
 
 export function CategoryTiles() {
@@ -102,7 +84,7 @@ export function CategoryTiles() {
     };
   }, [reloadCount]);
 
-  const categories = useMemo(() => buildCategoryTiles(services), [services]);
+  const tiles = useMemo(() => buildCategoryTiles(), []);
 
   function handleRetry() {
     setError(null);
@@ -118,14 +100,13 @@ export function CategoryTiles() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-rose-gold">
-            What are you looking for?
+            Categories
           </p>
           <h2 id="home-categories-heading" className="mt-3 text-3xl sm:text-4xl">
-            Explore by category
+            Explore by Category
           </h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            From a quick trim to a full spa day, find the service that fits your
-            plan.
+            Find the treatment you need and jump straight to it.
           </p>
         </div>
 
@@ -140,7 +121,7 @@ export function CategoryTiles() {
               {HOME_CATEGORIES.map((category) => (
                 <Skeleton
                   key={category}
-                  className="min-h-36 w-full rounded-card"
+                  className="min-h-40 w-full rounded-card"
                 />
               ))}
             </div>
@@ -150,40 +131,22 @@ export function CategoryTiles() {
               message={error}
               onRetry={handleRetry}
             />
+          ) : services.length === 0 ? (
+            <EmptyState
+              title="No categories yet"
+              description="Categories appear here once active services are added."
+            />
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {categories.map(({ name, count }) => {
-                const Icon = CATEGORY_ICONS[name] ?? Sparkles;
-                const href = `${ROUTES.services}?category=${encodeURIComponent(name)}`;
-
-                return (
-                  <Link
-                    key={name}
-                    href={href}
-                    className="group flex min-h-36 flex-col justify-between rounded-card border border-line bg-ivory p-5 transition duration-200 hover:-translate-y-1 hover:border-rose-gold hover:bg-blush-light focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold"
-                  >
-                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-plum shadow-sm transition-colors group-hover:bg-plum group-hover:text-white">
-                      <Icon aria-hidden="true" className="h-5 w-5" />
-                    </span>
-
-                    <span className="mt-4 flex items-end justify-between gap-2">
-                      <span className="text-sm font-bold leading-snug text-plum">
-                        {name}
-                      </span>
-                      <span className="flex items-center gap-1.5 text-xs text-rose-gold">
-                        {count > 0 ? (
-                          <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-plum">
-                            {count}
-                          </span>
-                        ) : null}
-                        <span className="opacity-0 transition-opacity group-hover:opacity-100">
-                          →
-                        </span>
-                      </span>
-                    </span>
-                  </Link>
-                );
-              })}
+              {tiles.map(({ label, href }, index) => (
+                <CategoryCard
+                  key={label}
+                  number={index + 1}
+                  label={label}
+                  href={href}
+                  icon={CATEGORY_ICONS[label]}
+                />
+              ))}
             </div>
           )}
         </div>

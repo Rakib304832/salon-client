@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./motion.css";
 
 /* ---------------------------------------------------------------------------
  * GLOBAL DESIGN TOKENS
@@ -22,6 +23,7 @@
   --white: #ffffff; /* cards and inputs */
   --plum: #4a2c3f; /* primary colour, headings, sidebar */
   --plum-dark: #2e1a28; /* footer, hero gradient start */
+  --heading: #4a2c3f; /* headings; lightens under the global dark theme */
   --rose-gold: #c9977e; /* accent, price, main CTA */
   --blush: #f3ddd5; /* soft accent, chips */
   --blush-light: #faede8; /* table headers, light panels */
@@ -114,7 +116,7 @@
   h6 {
     font-family: var(--font-playfair), Georgia, serif;
     font-weight: 600;
-    color: var(--plum);
+    color: var(--heading);
   }
 
   ::selection {

@@ -62,10 +62,10 @@ npm run start
 
 ## 3. Public pages
 
-- [ ] Home page renders the hero, category tiles, and **six** featured services
-      from the API.
-- [ ] Category tiles are derived from active services, include a service count,
-      and keep curated fallback categories when the catalogue is small.
+- [ ] Home page renders the Figma-aligned hero, seven numbered category tiles,
+      featured services, why-choose-us section and final CTA band in that order.
+- [ ] The seven category tiles use the design labels and link to live API
+      categories through the browse page.
 - [ ] Home and service pages show skeletons while loading.
 - [ ] Service search is debounced and updates the URL query string.
 - [ ] Category and price filters can be combined and cleared.

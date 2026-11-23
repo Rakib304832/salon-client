@@ -50,12 +50,11 @@ export default function ServicesPage() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-rose-gold">
-            Our service menu
+            Our menu
           </p>
-          <h1 className="mt-3 text-4xl sm:text-5xl">Browse services</h1>
+          <h1 className="mt-3 text-4xl sm:text-5xl">Browse Services</h1>
           <p className="mt-4 text-sm leading-6 text-muted">
-            Search by name, narrow down by category, and sort by price to find
-            exactly what you need.
+            Explore every treatment we offer and find your perfect appointment.
           </p>
         </div>
 

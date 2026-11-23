@@ -158,7 +158,7 @@ export function BookingForm({ service }: BookingFormProps) {
 
       <Input
         type="date"
-        label="Appointment date"
+        label="Appointment Date"
         placeholder="YYYY-MM-DD"
         min={earliestBookingDate()}
         leadingIcon={<CalendarDays aria-hidden="true" className="h-4 w-4" />}
@@ -167,14 +167,14 @@ export function BookingForm({ service }: BookingFormProps) {
       />
 
       <Select
-        label="Time slot"
+        label="Available Time Slots"
         error={errors.timeSlot?.message}
         options={TIME_SLOTS.map((slot) => ({ value: slot, label: slot }))}
         {...form.register("timeSlot")}
       />
 
       <Textarea
-        label="Note for the salon (optional)"
+        label="Additional Message"
         placeholder="Tell us anything the stylist should know…"
         maxLength={500}
         rows={4}

@@ -18,17 +18,12 @@ import { GoogleButton } from "./GoogleButton";
 /**
  * SIGN-IN FORM
  * ------------
- * The form validates locally with Zod, but Better Auth on the Express server is
- * the real authority. It returns a cookie, so there is no token to store in
- * localStorage (which would be vulnerable to XSS).
+ * Credentials are validated locally with Zod, then Better Auth on the Express
+ * server is the real authority. Better Auth sets a cookie, so no token is kept
+ * in localStorage.
  *
- * Flow:
- * 1. submit credentials to Express via the Better Auth client
- * 2. call AuthProvider.refresh() so the whole app sees the new session
- * 3. redirect to a role dashboard or the guarded page the user originally tried
- * 4. send blocked accounts to the Account Blocked explanation instead
- *
- * useSearchParams requires a Suspense boundary; the sign-in page provides one.
+ * Layout follows the Figma screen: email/password form, `or` divider, then the
+ * Google option underneath.
  */
 export function SignInForm() {
   const router = useRouter();
@@ -55,7 +50,6 @@ export function SignInForm() {
     try {
       const result = await signInWithEmail(values);
 
-      // Better Auth reports credential errors in `error` instead of throwing.
       if (result?.error) {
         toastError(
           "Sign in failed",
@@ -77,11 +71,7 @@ export function SignInForm() {
         return;
       }
 
-      // A guard created returnTo; without one, the role dashboard is friendlier
-      // than dropping the user on the public home page.
-      router.replace(
-        rawReturnTo ? returnTo : dashboardForRole(user.role),
-      );
+      router.replace(rawReturnTo ? returnTo : dashboardForRole(user.role));
     } catch (error) {
       toastApiError(error, "Could not sign in. Please try again.");
     }
@@ -90,25 +80,12 @@ export function SignInForm() {
   return (
     <div className="space-y-7">
       <header>
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-rose-gold">
-          Welcome back
-        </p>
-        <h1 className="mt-2 text-3xl">Sign in to SalonBook</h1>
+        <h1 className="text-3xl">Welcome back</h1>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Manage your bookings, pay for confirmed visits, and keep your profile
-          up to date.
+          Sign in to manage your appointments.
         </p>
       </header>
 
-      <GoogleButton returnTo={rawReturnTo} />
-
-      <div className="flex items-center gap-3 text-xs text-muted">
-        <span className="h-px flex-1 bg-line" />
-        <span>or continue with email</span>
-        <span className="h-px flex-1 bg-line" />
-      </div>
-
-      {/* noValidate lets Zod own the error messages instead of native bubbles. */}
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
         <Input
           type="email"
@@ -153,6 +130,14 @@ export function SignInForm() {
           Sign in
         </Button>
       </form>
+
+      <div className="flex items-center gap-3 text-xs text-muted">
+        <span className="h-px flex-1 bg-line" />
+        <span>or</span>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+
+      <GoogleButton returnTo={rawReturnTo} />
 
       <p className="text-center text-sm text-muted">
         New to SalonBook?{" "}

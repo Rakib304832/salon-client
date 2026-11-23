@@ -5,29 +5,15 @@ import Link from "next/link";
 import { EmptyState, ErrorState, SkeletonGrid, buttonStyles } from "@/components/ui";
 import { ServiceCard } from "@/components/services";
 import { servicesApi } from "@/lib/api";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES, preferFeaturedServices } from "@/lib/constants";
 import type { Service } from "@/types";
 
 /**
  * FEATURED SERVICES
  * -----------------
- * The only data-driven section on Home. It calls the public /api/services
- * endpoint, which already returns active-only services, and shows the first
- * six as the brief's featured-service section.
- *
- * Loading states are explicit:
- * - skeleton grid while the request is in flight
- * - inline ErrorState with Retry on failure (never a silent empty grid)
- * - EmptyState with a clear next action if the salon has no services yet
- *
- * Why this is a Client Component:
- * - The API origin is a public NEXT_PUBLIC_* value and this is a purely
- *   presentational read, so no server route is needed.
- * - Retry needs local state and a click handler.
- *
- * The effect only writes state inside promise callbacks. Initial `loading` is
- * true from useState, and Retry sets it from an event handler, so there is no
- * synchronous setState in the effect body.
+ * Reads the public /api/services endpoint and orders the catalogue so the
+ * signature services from the Figma design appear first. Loading, failure and
+ * retry states remain explicit so a slow API never leaves a blank grid.
  */
 const FEATURED_LIMIT = 6;
 
@@ -44,7 +30,7 @@ export function FeaturedServices() {
       .list()
       .then((data) => {
         if (!active) return;
-        setServices(data.slice(0, FEATURED_LIMIT));
+        setServices(preferFeaturedServices(data).slice(0, FEATURED_LIMIT));
         setError(null);
       })
       .catch((caught: unknown) => {
@@ -79,13 +65,13 @@ export function FeaturedServices() {
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-rose-gold">
-              Popular right now
+              Featured
             </p>
             <h2
               id="featured-services-heading"
               className="mt-3 text-3xl sm:text-4xl"
             >
-              Featured services
+              Our Signature Services
             </h2>
             <p className="mt-3 text-sm leading-6 text-muted">
               A small taste of what is available. Browse the full menu to find

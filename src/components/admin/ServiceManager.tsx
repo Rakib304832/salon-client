@@ -491,7 +491,7 @@ function ServiceRow({
             loading={busy === "delete"}
             disabled={busy !== null}
             aria-label={`Delete ${service.serviceName}`}
-            className="text-[#B24A4A] hover:bg-[#FCEDED]"
+            className="text-status-blocked-text hover:bg-status-blocked-bg"
           >
             <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
           </Button>
@@ -586,7 +586,7 @@ function ServiceMobileCard({
           onClick={onDelete}
           loading={busy === "delete"}
           disabled={disabled}
-          className="text-[#B24A4A] hover:bg-[#FCEDED]"
+          className="text-status-blocked-text hover:bg-status-blocked-bg"
         >
           <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
           Delete

@@ -1,0 +1,177 @@
+/* ---------------------------------------------------------------------------
+ * GLOBAL THEME LAYER
+ * ---------------------------------------------------------------------------
+ * The light palette lives in globals.css so Tailwind's `@theme inline` can
+ * expose it as utilities. This file only describes the dark counterpart and
+ * the handful of utilities that cannot be expressed by a single token.
+ *
+ * WHY a separate file: the pre-paint script in the root layout only sets
+ * `data-theme` on <html>. Every rule here is selected from that attribute, so
+ * the whole document changes together — including surfaces rendered inside
+ * client components and pages that do not use the public navbar.
+ * --------------------------------------------------------------------------- */
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surfaces go dark; primary plum stays dark so filled buttons keep their
+     contrast. Text that used to be `text-plum` is remapped below. */
+  --ivory: #181017;
+  --white: #241a21;
+  --plum: #4a2c3f;
+  --plum-dark: #100a0f;
+  --rose-gold: #e2ad93;
+  --blush: #3b2833;
+  --blush-light: #2d2029;
+  --heading: #f5e5dc;
+  --text: #f5ece7;
+  --muted: #b9a8ae;
+  --line: #49343f;
+
+  /* Status badges keep their meaning (amber/green/red) but use dark fills and
+     lighter text so they remain legible on cards. */
+  --status-pending-bg: #3b2d1a;
+  --status-pending-text: #f0c274;
+  --status-confirmed-bg: #1e3325;
+  --status-confirmed-text: #9bd0a4;
+  --status-blocked-bg: #3d2022;
+  --status-blocked-text: #ff9b9b;
+  --status-paid-bg: #332433;
+  --status-paid-text: #f0c9e2;
+  --status-unpaid-bg: #2b2527;
+  --status-unpaid-text: #c7b8be;
+
+  /* Scripted motion reads these variables, so it inherits the switch too. */
+  --statement-rest: #b9a8ae;
+  --statement-accent: #e2ad93;
+  --m-shadow: 0 12px 24px -12px rgb(0 0 0 / 0.55);
+}
+
+:root[data-theme="dark"] ::selection {
+  background-color: var(--rose-gold);
+  color: #2e1a28;
+}
+
+/* ---------------------------------------------------------------------------
+ * UTILITY REMAPPING
+ * ---------------------------------------------------------------------------
+ * Tailwind's `text-white`, `text-plum`, `border-white` and translucent
+ * `bg-white/x` utilities all point at the same light-palette tokens. In dark
+ * mode those tokens become surfaces, so these utility names need a semantic
+ * override. Substring selectors cover variants such as `hover:text-white`
+ * and `group-hover:text-white` without editing hundreds of call sites.
+ * --------------------------------------------------------------------------- */
+:root[data-theme="dark"] [class*="text-white"] {
+  color: #f7eee9;
+}
+
+:root[data-theme="dark"] [class*="text-plum"] {
+  color: var(--heading);
+}
+
+:root[data-theme="dark"] [class*="border-white"] {
+  border-color: rgb(247 238 233 / 0.2);
+}
+
+:root[data-theme="dark"] .border-white {
+  border-color: rgb(247 238 233 / 0.55);
+}
+
+:root[data-theme="dark"] [class*="bg-white/"] {
+  background-color: rgb(247 238 233 / 0.07);
+}
+
+/* The dashboard content band needs a real dark surface, not a white wash. */
+:root[data-theme="dark"] .bg-white\/70 {
+  background-color: rgb(36 26 33 / 0.72);
+}
+
+/* Restore hover feedback after the generic translucent rule above. */
+:root[data-theme="dark"] [class*="hover:bg-white/"]:hover {
+  background-color: rgb(247 238 233 / 0.12);
+}
+
+/* Rose-gold buttons are the exception: dark ink reads better on the accent. */
+:root[data-theme="dark"] .bg-rose-gold[class*="text-white"] {
+  color: #2e1a28;
+}
+
+/* ---------------------------------------------------------------------------
+ * THEME CONTROL
+ * ---------------------------------------------------------------------------
+ * Icons are swapped with CSS, not React, because the correct glyph must be
+ * present before hydration. The root-layout fallback disappears when any
+ * shell-provided control is mounted, avoiding duplicate switches.
+ * --------------------------------------------------------------------------- */
+.theme-icon-sun {
+  display: none;
+}
+
+.theme-icon-moon {
+  display: block;
+}
+
+:root[data-theme="dark"] .theme-icon-sun {
+  display: block;
+}
+
+:root[data-theme="dark"] .theme-icon-moon {
+  display: none;
+}
+
+.theme-segmented {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background-color: var(--white);
+}
+
+.theme-segmented-option {
+  display: inline-flex;
+  min-width: 5.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.5rem 0.9rem;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.theme-segmented-option[aria-pressed="true"] {
+  background-color: var(--plum);
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .theme-segmented-option[aria-pressed="true"] {
+  background-color: var(--rose-gold);
+  color: #2e1a28;
+}
+
+.theme-segmented-option:focus-visible {
+  outline: 2px solid var(--rose-gold);
+  outline-offset: 2px;
+}
+
+.theme-toggle-global {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 60;
+  box-shadow: 0 12px 30px -12px rgb(46 26 40 / 0.45);
+}
+
+/* `:has` keeps standalone pages covered while public/dashboard/auth shells
+   provide a control inside their own chrome. */
+body:has(.theme-toggle-local) .theme-toggle-global {
+  display: none;
+}

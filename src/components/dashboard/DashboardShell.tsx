@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/components/providers";
 import { Logo } from "@/components/layout";
+import { ThemeToggle } from "@/components/theme";
 import { Spinner, buttonStyles } from "@/components/ui";
 import { ROUTES } from "@/lib/constants";
 import { toastApiError, toastSuccess } from "@/lib/toast";
@@ -150,6 +151,13 @@ export function DashboardShell({ area, children }: DashboardShellProps) {
             </span>
           </div>
 
+          <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-5">
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-blush">
+              Appearance
+            </span>
+            <ThemeToggle local />
+          </div>
+
           <button
             type="button"
             onClick={() => void handleSignOut()}
@@ -171,19 +179,22 @@ export function DashboardShell({ area, children }: DashboardShellProps) {
         <header className="border-b border-line bg-white px-4 py-4 sm:px-6 lg:hidden">
           <div className="flex items-center justify-between gap-4">
             <Logo />
-            <button
-              type="button"
-              onClick={() => void handleSignOut()}
-              disabled={signingOut}
-              aria-label="Sign out"
-              className="rounded-full border border-line p-2 text-plum hover:bg-blush-light disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold"
-            >
-              {signingOut ? (
-                <Spinner size="sm" label="Signing out" />
-              ) : (
-                <LogOut aria-hidden="true" className="h-4 w-4" />
-              )}
-            </button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle local />
+              <button
+                type="button"
+                onClick={() => void handleSignOut()}
+                disabled={signingOut}
+                aria-label="Sign out"
+                className="rounded-full border border-line p-2 text-plum hover:bg-blush-light disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold"
+              >
+                {signingOut ? (
+                  <Spinner size="sm" label="Signing out" />
+                ) : (
+                  <LogOut aria-hidden="true" className="h-4 w-4" />
+                )}
+              </button>
+            </div>
           </div>
 
           <nav

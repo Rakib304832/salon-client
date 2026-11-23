@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Registered ThreeUI sources are vendored byte-for-byte. Linting them
+    // would require changing the exact source revision we integrated.
+    "src/shaders/**",
   ]),
 ]);
 

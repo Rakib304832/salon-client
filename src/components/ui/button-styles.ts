@@ -28,7 +28,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   accent: "bg-rose-gold text-white hover:brightness-95",
   outline: "border border-plum bg-white text-plum hover:bg-blush-light",
   ghost: "bg-transparent text-plum hover:bg-blush-light",
-  danger: "bg-[#B24A4A] text-white hover:brightness-95",
+  danger: "bg-status-blocked-text text-white hover:brightness-95",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -57,7 +57,7 @@ export function buttonStyles({
   className,
 }: ButtonStyleOptions = {}): string {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-full font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
+    "m-btn inline-flex items-center justify-center gap-2 rounded-full font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
     variantStyles[variant],
     sizeStyles[size],
     fullWidth && "w-full",

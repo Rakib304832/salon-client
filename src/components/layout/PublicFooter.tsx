@@ -1,18 +1,13 @@
 import Link from "next/link";
-import { Clock, Mail, MapPin, Phone, Sparkles } from "lucide-react";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { ROUTES, SALON_CONTACT } from "@/lib/constants";
 import { Logo } from "./Logo";
 
 /**
  * PUBLIC FOOTER
  * -------------
- * A Server Component: it contains only static links and copy, so it adds zero
- * JavaScript to the browser bundle.
- *
- * The salon contact details live in SALON_CONTACT so the email/telephone links,
- * address and opening hours cannot drift apart. The sample values are safe to
- * ship with the client repository; replace them with the real salon details
- * before the production launch.
+ * Server Component with the contact details, opening hours and social links
+ * from the Figma design. Values live in SALON_CONTACT so links stay in sync.
  */
 export function PublicFooter() {
   const year = new Date().getFullYear();
@@ -20,12 +15,27 @@ export function PublicFooter() {
   return (
     <footer className="border-t border-plum bg-plum-dark text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-12 sm:px-6 lg:px-8">
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-5">
           <Logo tone="light" />
           <p className="mt-4 max-w-sm text-sm leading-6 text-blush">
-            A calm, simple way to discover salon services, request a time that
-            suits you, and manage every visit in one place.
+            A calm, modern salon where every appointment feels like a little
+            retreat. Book your next glow-up in minutes.
           </p>
+          <ul className="mt-6 flex items-center gap-3">
+            {SALON_CONTACT.socialLinks.map((link) => (
+              <li key={link.label}>
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={link.label === "X" ? "X" : undefined}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-sm font-bold text-white transition-colors hover:border-rose-gold hover:text-rose-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className="lg:col-span-2">
@@ -38,7 +48,7 @@ export function PublicFooter() {
             </li>
             <li>
               <Link href={ROUTES.services} className="hover:text-white">
-                Browse services
+                Browse Services
               </Link>
             </li>
             <li>
@@ -52,31 +62,7 @@ export function PublicFooter() {
           </ul>
         </div>
 
-        <div className="lg:col-span-2">
-          <h2 className="font-sans text-sm font-bold text-white">Account</h2>
-          <ul className="mt-4 space-y-2.5 text-sm text-blush">
-            <li>
-              <Link href={ROUTES.signIn} className="hover:text-white">
-                Sign in
-              </Link>
-            </li>
-            <li>
-              <Link href={ROUTES.signUp} className="hover:text-white">
-                Create account
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={ROUTES.customerAppointments}
-                className="hover:text-white"
-              >
-                My appointments
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-5">
           <h2 className="font-sans text-sm font-bold text-white">
             Visit &amp; contact
           </h2>
@@ -120,41 +106,11 @@ export function PublicFooter() {
             </dl>
           </div>
         </div>
-
-        <div className="sm:col-span-2 lg:col-span-12">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-white/10 pt-8">
-            <h2 className="font-sans text-sm font-bold text-white">Follow us</h2>
-            <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-blush">
-              {SALON_CONTACT.socialLinks.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-sm hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-gold"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
       </div>
 
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-6 text-xs text-blush sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 text-xs text-blush sm:px-6 lg:px-8">
           <p>© {year} SalonBook. All rights reserved.</p>
-          <p className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-1.5">
-              <Clock aria-hidden="true" className="h-3.5 w-3.5" />
-              Booking available online
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Sparkles aria-hidden="true" className="h-3.5 w-3.5" />
-              Made for modern salons
-            </span>
-          </p>
         </div>
       </div>
     </footer>

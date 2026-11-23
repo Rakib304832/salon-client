@@ -1,11 +1,15 @@
 /**
  * Service UI barrel.
  *
- * The home page, browse page and admin previews all import the same card so
- * pricing, duration and image handling stay consistent. The browser bundle
- * owns URL/filter state; the card stays reusable in both Server and Client
- * Components.
+ * The home page, browse page and detail page all import from here so pricing,
+ * duration, category and image handling stay consistent.
  */
+export { BookingCard } from "./BookingCard";
+export type { BookingCardProps } from "./BookingCard";
+export { CategoryPills } from "./CategoryPills";
+export type { CategoryPillsProps } from "./CategoryPills";
+export { IncludedList } from "./IncludedList";
+export type { IncludedListProps } from "./IncludedList";
 export { ServiceBrowser } from "./ServiceBrowser";
 export { ServiceCard } from "./ServiceCard";
 export type { ServiceCardProps } from "./ServiceCard";

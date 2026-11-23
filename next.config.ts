@@ -14,6 +14,21 @@ import type { NextConfig } from "next";
  */
 const nextConfig: NextConfig = {
   /**
+   * ThreeUI ships the 3D paper scenes as complete HTML documents. The
+   * registered component imports them with Vite's `?raw` suffix, so Turbopack
+   * needs to treat those four imports as plain strings. This keeps the exact
+   * authored source untouched; only the module type changes.
+   */
+  turbopack: {
+    rules: {
+      "*.html": {
+        condition: { query: "?raw" },
+        type: "raw",
+      },
+    },
+  },
+
+  /**
    * React strict mode highlights unsafe patterns during development.
    * It does not change production behaviour, but it helps catch bad effects
    * while we build the session hook and data-fetching components later.

@@ -1,0 +1,109 @@
+/*
+ * HERO PHOTO LAYER
+ * ----------------
+ * The photograph is the same locally stored salon image that was previously
+ * only visible through the blurred hero background. It is now the whole hero
+ * surface. Keeping it in a decorative layer means no content component has to
+ * know about it, and `background-size: cover` handles every viewport shape.
+ */
+.hero {
+  background-color: #140b11;
+}
+
+.photo {
+  --salon-photo: url("/salon-interior.jpg");
+
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--salon-photo);
+  background-position: center 44%;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/*
+ * The gradient is layered over the photo instead of baked into it so the same
+ * image can stay crisp while the wash changes with the global theme. Two axes
+ * are used: a left-to-right wash protects the copy, and a vertical wash keeps
+ * the stats and bottom badge legible.
+ */
+.photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(12 7 10 / 0.34) 0%,
+      rgb(12 7 10 / 0.16) 38%,
+      rgb(12 7 10 / 0.74) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgb(12 7 10 / 0.9) 0%,
+      rgb(12 7 10 / 0.64) 46%,
+      rgb(12 7 10 / 0.28) 100%
+    );
+}
+
+/* Dark mode deepens the same wash rather than swapping images, so the room
+   still reads as the same salon while every surface becomes darker. */
+:global([data-theme="dark"]) .photo::after {
+  background:
+    linear-gradient(
+      180deg,
+      rgb(6 3 6 / 0.56) 0%,
+      rgb(6 3 6 / 0.22) 40%,
+      rgb(6 3 6 / 0.84) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgb(6 3 6 / 0.94) 0%,
+      rgb(6 3 6 / 0.72) 48%,
+      rgb(6 3 6 / 0.38) 100%
+    );
+}
+
+/* ON-PHOTO CONTRAST ---------------------------------------------------------
+ * The copy keeps its original words, classes and GSAP markers. These scoped
+ * rules only change colour where the dark photograph would otherwise fight
+ * the default light-theme ink.
+ * ------------------------------------------------------------------------- */
+.heading {
+  color: #ffffff;
+  text-shadow: 0 2px 20px rgb(0 0 0 / 0.45);
+}
+
+.lead {
+  color: rgb(255 255 255 / 0.86);
+}
+
+.stats dl {
+  border-color: rgb(255 255 255 / 0.3);
+}
+
+.stats dd > span:first-child {
+  color: #ffffff;
+}
+
+.stats dd > span:last-child {
+  color: rgb(255 255 255 / 0.74);
+}
+
+.ratingSlot {
+  filter: drop-shadow(0 16px 30px rgb(0 0 0 / 0.35));
+}
+
+:global([data-theme="dark"]) .heading {
+  color: #fff6f0;
+}
+
+:global([data-theme="dark"]) .lead {
+  color: rgb(247 238 233 / 0.84);
+}
+
+:global([data-theme="dark"]) .stats dd > span:last-child {
+  color: rgb(247 238 233 / 0.72);
+}

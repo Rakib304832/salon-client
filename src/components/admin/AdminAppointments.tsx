@@ -360,7 +360,7 @@ export function AdminAppointments() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-[#B24A4A] hover:bg-[#FCEDED]"
+                              className="text-status-blocked-text hover:bg-status-blocked-bg"
                               disabled={busy !== null}
                               onClick={() => setCancelTarget(appointment)}
                             >
@@ -571,7 +571,7 @@ function AppointmentMobileCard({
           <Button
             variant="ghost"
             size="sm"
-            className="text-[#B24A4A] hover:bg-[#FCEDED]"
+            className="text-status-blocked-text hover:bg-status-blocked-bg"
             disabled={disabled}
             onClick={onCancel}
           >

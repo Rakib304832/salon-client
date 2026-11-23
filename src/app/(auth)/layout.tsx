@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Sparkles } from "lucide-react";
 import { Logo } from "@/components/layout";
+import { ThemeToggle } from "@/components/theme";
 
 /**
  * AUTH ROUTE GROUP LAYOUT
@@ -22,16 +23,15 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         <div className="relative z-10 max-w-md">
           <Sparkles aria-hidden="true" className="h-9 w-9 text-rose-gold" />
           <h1 className="mt-6 text-4xl leading-tight">
-            Your next great look starts here.
+            “A beautiful appointment begins with a beautifully simple booking.”
           </h1>
           <p className="mt-4 text-base leading-7 text-blush">
-            Explore trusted services, request a time that works for you, and
-            manage every salon visit from one calm, simple place.
+            — The SalonBook promise
           </p>
         </div>
 
         <p className="relative z-10 text-sm text-blush">
-          Browse first, book when you are ready.
+          Book trusted salon services in a few calm steps.
         </p>
 
         {/* Decorative blurred shapes; aria-hidden keeps them out of screen readers. */}
@@ -45,7 +45,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         />
       </section>
 
-      <section className="flex items-center justify-center bg-ivory px-4 py-12 sm:px-8">
+      <section className="relative flex items-center justify-center bg-ivory px-4 py-12 sm:px-8">
+        <div className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
+          <ThemeToggle local />
+        </div>
         <div className="w-full max-w-md">{children}</div>
       </section>
     </main>
